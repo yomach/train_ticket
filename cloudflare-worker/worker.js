@@ -2,7 +2,12 @@ import helpers from "./worker-helpers.cjs";
 
 const { shouldServeStatusPage, buildStatusPayload } = helpers;
 const UPSTREAM = "https://rail-api.rail.co.il/common/api/v1";
-const ALLOWED_ORIGIN = "https://train-ticket-idshklein.netlify.app";
+const ALLOWED_ORIGINS = new Set([
+  "https://train-ticket-idshklein.netlify.app",
+  "http://localhost:8000",
+  "http://127.0.0.1:8000",
+]);
+const DEFAULT_ORIGIN = "https://train-ticket-idshklein.netlify.app";
 
 function buildUpstreamUrl(pathname = "") {
   const tail = String(pathname).replace(/^\/+/, "");
@@ -31,12 +36,13 @@ function buildUpstreamHeaders(cookieHeader) {
 }
 
 function corsHeaders(origin) {
-  const allowed = origin === ALLOWED_ORIGIN ? origin : ALLOWED_ORIGIN;
+  const allowed = ALLOWED_ORIGINS.has(origin) ? origin : DEFAULT_ORIGIN;
   return {
     "Access-Control-Allow-Origin": allowed,
     "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
     "Access-Control-Allow-Headers": "Content-Type",
     "Access-Control-Allow-Credentials": "true",
+    "Vary": "Origin",
   };
 }
 

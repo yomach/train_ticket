@@ -1,6 +1,14 @@
 const JERUSALEM_STATION_ID = "680";
 const DEFAULT_OTHER_STATION = "2800";
-const API_BASE = "https://rail-proxy.idshk-train-ticket-20260414.workers.dev";
+const DEFAULT_API_BASE = "https://rail-proxy.idshk-train-ticket-20260414.workers.dev";
+// Local-dev override: localStorage.setItem("apiBase", "http://localhost:8787")
+const API_BASE = (() => {
+  try {
+    return localStorage.getItem("apiBase") || DEFAULT_API_BASE;
+  } catch {
+    return DEFAULT_API_BASE;
+  }
+})();
 const bookingHelpers = window.BookingHelpers || {};
 const buildReservationUrl =
   bookingHelpers.buildReservationUrl ||
