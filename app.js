@@ -87,6 +87,17 @@ function getPhoneCookie() {
   return match ? decodeURIComponent(match[1]) : "";
 }
 
+function setLastToJerusalemStation(stationId) {
+  const expires = new Date();
+  expires.setFullYear(expires.getFullYear() + 1);
+  document.cookie = `lastToJerusalemStation=${encodeURIComponent(stationId)};expires=${expires.toUTCString()};path=/`;
+}
+
+function getLastToJerusalemStation() {
+  const match = document.cookie.match(/(?:^|; )lastToJerusalemStation=([^;]*)/);
+  return match ? decodeURIComponent(match[1]) : "";
+}
+
 // ── Date helpers ─────────────────────────────────────────────────────────────
 
 function setDefaultDate() {
@@ -141,9 +152,18 @@ function renderStationOptions() {
     ),
   ].join("");
 
-  if (stations.some((station) => String(station.stationId) === previousValue)) {
+  const remembered =
+    state.direction === "to-jerusalem" ? getLastToJerusalemStation() : "";
+  const inList = (id) => stations.some((station) => String(station.stationId) === id);
+
+  // For to-jerusalem, the remembered station wins over the previously-shown
+  // value: the dropdown often holds the from-jerusalem destination at toggle
+  // time, which would otherwise mask the user's saved origin preference.
+  if (remembered && inList(remembered)) {
+    elements.otherStation.value = remembered;
+  } else if (inList(previousValue)) {
     elements.otherStation.value = previousValue;
-  } else if (stations.some((station) => String(station.stationId) === DEFAULT_OTHER_STATION)) {
+  } else if (inList(DEFAULT_OTHER_STATION)) {
     elements.otherStation.value = DEFAULT_OTHER_STATION;
   } else if (stations[0]) {
     elements.otherStation.value = String(stations[0].stationId);
@@ -233,22 +253,32 @@ async function apiPost(path, body) {
 }
 
 async function sendOtp(phone) {
-  return apiPost("SendOtp", { userContact: phone, type: "phone" });
+  return apiPost("Otp/Send", {
+    userContact: phone,
+    type: "phone",
+    languageId: "Hebrew",
+  });
 }
 
 async function verifyOtp(phone, otp) {
-  return apiPost("VerifyOtp", { userContact: phone, type: "phone", otp });
+  return apiPost("Otp/Verify", {
+    userContact: phone,
+    type: "phone",
+    otp,
+    languageId: "Hebrew",
+  });
 }
 
 async function orderSeat(params) {
-  return apiPost("OrderSeatForTrip", {
+  return apiPost("TripReservation/OrderSeatForTrip", {
     fromStation: params.fromStation,
     toStation: params.toStation,
     departureDate: params.date,
     numberSeats: 1,
-    sourceChannel: "web",
+    systemTypeId: "2",
     trainNumber: Number(params.trainNumber),
-    type: "",
+    type: "phone",
+    languageId: "Hebrew",
   });
 }
 
@@ -305,10 +335,11 @@ async function handleSubmit(event) {
   // Try ordering with existing authToken first
   try {
     const data = await orderSeat(state.tripParams);
-    if (data.statusCode === 200 && data.result?.result) {
+    const confirmationCode = data.result?.data?.confirmationCode;
+    if (data.statusCode === 200 && data.result?.success && confirmationCode) {
       submitBtn.disabled = false;
       elements.statusText.textContent = "";
-      showResult(data.result.result);
+      showResult(confirmationCode);
       return;
     }
     throw new Error(JSON.stringify(data.errorMessages || data));
@@ -384,13 +415,13 @@ async function handleOtpConfirm() {
 
   try {
     const data = await orderSeat(state.tripParams);
+    const confirmationCode = data.result?.data?.confirmationCode;
 
-    if (data.statusCode !== 200 || !data.result?.result) {
+    if (data.statusCode !== 200 || !data.result?.success || !confirmationCode) {
       throw new Error(JSON.stringify(data.errorMessages || data));
     }
 
-    const resultId = data.result.result;
-    showResult(resultId);
+    showResult(confirmationCode);
   } catch (error) {
     console.error(error);
 
@@ -464,7 +495,12 @@ async function loadData() {
 
 function registerEvents() {
   elements.directionGroup.addEventListener("click", handleDirectionClick);
-  elements.otherStation.addEventListener("change", updateStatus);
+  elements.otherStation.addEventListener("change", () => {
+    if (state.direction === "to-jerusalem" && elements.otherStation.value) {
+      setLastToJerusalemStation(elements.otherStation.value);
+    }
+    updateStatus();
+  });
   elements.tripDate.addEventListener("change", updateStatus);
   elements.tripTime.addEventListener("change", syncTrainNumberToTime);
   elements.voucherForm.addEventListener("submit", handleSubmit);

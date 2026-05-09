@@ -1,7 +1,7 @@
 import helpers from "./worker-helpers.cjs";
 
 const { shouldServeStatusPage, buildStatusPayload } = helpers;
-const UPSTREAM = "https://rail-api.rail.co.il/common/api/v1/TripReservation";
+const UPSTREAM = "https://rail-api.rail.co.il/common/api/v1";
 const ALLOWED_ORIGIN = "https://train-ticket-idshklein.netlify.app";
 
 function buildUpstreamUrl(pathname = "") {
@@ -38,6 +38,13 @@ function corsHeaders(origin) {
     "Access-Control-Allow-Headers": "Content-Type",
     "Access-Control-Allow-Credentials": "true",
   };
+}
+
+// Upstream sets cookies with Domain=rail.co.il. Browsers reject those for
+// the proxy host. Strip the Domain attribute so the cookie defaults to the
+// proxy origin, which is what the FE needs to read it back via credentials.
+function rewriteSetCookie(cookie) {
+  return cookie.replace(/;\s*Domain=[^;]+/i, "");
 }
 
 export default {
@@ -78,7 +85,7 @@ export default {
 
     const setCookies = response.headers.getAll?.("set-cookie") ?? [];
     for (const cookie of setCookies) {
-      responseHeaders.append("Set-Cookie", cookie);
+      responseHeaders.append("Set-Cookie", rewriteSetCookie(cookie));
     }
 
     return new Response(responseBody, {
