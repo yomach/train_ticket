@@ -143,6 +143,33 @@ If you want to host it yourself:
   CF worker's current logic) and set `API_BASE` to
   `/.netlify/functions/rail-proxy` to keep everything on one origin.
 
+## Branch / fork hygiene
+
+This fork's `main` is **upstream/main + the upstream-bound fix +
+one local-dev `chore` commit on top** (the `localStorage` override,
+the localhost CORS additions, this file). When the upstream PR
+([idshklein/train_ticket#3](https://github.com/idshklein/train_ticket/pull/3))
+merges, drop the now-duplicate fix commit and keep only the
+local-dev one:
+
+```bash
+git fetch upstream
+git rebase upstream/main   # drops the duplicated fix commit; keeps chore(local-dev)
+git push --force-with-lease origin main
+```
+
+When sending another upstream PR in the future, branch from
+`upstream/main` (not your local `main`) and **omit** these
+local-dev pieces:
+
+- `localStorage.apiBase` override block in `app.js`
+- `localhost:8000` / `127.0.0.1:8000` in `ALLOWED_ORIGINS` (and the
+  `Vary: Origin` header that comes with multi-origin)
+- `LOCAL_DEV.md` itself
+
+The general rule: anything that only exists to make `wrangler dev`
++ a static server work on your laptop stays out of upstream.
+
 ## Files that matter
 
 | Path | Purpose |
