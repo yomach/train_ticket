@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">שובר רכבת</string>
+    <string name="title_activity_main">שובר רכבת</string>
+    <string name="package_name">com.yomach.trainticket</string>
+    <string name="custom_url_scheme">com.yomach.trainticket</string>
+</resources>

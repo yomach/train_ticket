@@ -6,6 +6,10 @@ isn't obvious from reading the source — most importantly, *why* certain
 small things exist and *how* this app breaks when rail.co.il rotates
 its API.
 
+> **Building the Android app?** See [`ANDROID.md`](ANDROID.md) for
+> Capacitor build/install. This file covers the browser FE and the
+> Cloudflare Worker proxy.
+
 ## What this app does
 
 End-to-end booking of a free Israel Railways "Jerusalem voucher"
@@ -56,8 +60,10 @@ to build dropdowns without hitting the API for trip discovery.
 cd cloudflare-worker
 npx --yes wrangler@latest dev --port 8787 --local
 
-# 2. Static FE (in another terminal)
-cd /home/yomach/codex/train_ticket
+# 2. Static FE (in another terminal). The FE moved into www/ when we
+#    added the Capacitor Android wrapper — Capacitor uses www/ as the
+#    WebView root. Serve from there in the browser too.
+cd /home/yomach/codex/train_ticket/www
 python3 -m http.server 8000
 
 # 3. Open http://localhost:8000 in a browser, then in DevTools console:
@@ -65,7 +71,7 @@ localStorage.setItem('apiBase', 'http://localhost:8787'); location.reload();
 ```
 
 The `localStorage.apiBase` override is read by `app.js` at startup
-(`DEFAULT_API_BASE` is the production worker URL). To go back to prod
+(`DEFAULT_PROXY_BASE` is the production worker URL). To go back to prod
 behavior in the same browser:
 
 ```js
@@ -174,12 +180,15 @@ The general rule: anything that only exists to make `wrangler dev`
 
 | Path | Purpose |
 |---|---|
-| `app.js` | All FE logic: form state, OTP flow, cookies, `apiPost` |
-| `booking-helpers.js` | URL builder + redirect-fallback heuristic, exposed for tests |
-| `cloudflare-worker/worker.js` | The live proxy — UPSTREAM, headers, CORS, cookie rewrite |
+| `www/app.js` | All FE logic: form state, OTP flow, cookies, `apiPost`, native vs browser branch |
+| `www/booking-helpers.js` | URL builder + redirect-fallback heuristic, exposed for tests |
+| `www/index.html` | Three steps: form → OTP → result |
+| `www/rail_times_index.json` | Pre-built GTFS index (~85KB) of valid trips |
+| `www/vendor/qrcode.min.js` | Vendored qrcodejs (was a CDN script) |
+| `cloudflare-worker/worker.js` | The live proxy for the **browser** build — UPSTREAM, headers, CORS, cookie rewrite |
 | `cloudflare-worker/wrangler.toml` | Worker name + compat date |
-| `index.html` | Three steps: form → OTP → result |
-| `rail_times_index.json` | Pre-built GTFS index (~85KB) of valid trips |
+| `capacitor.config.json` | Capacitor app config (appId, webDir, plugins) |
+| `android/` | Capacitor-generated Android Studio project |
 | `tests/booking-helpers.test.js` | Tests `buildReservationUrl` + redirect heuristic |
 | `tests/rail-proxy.test.js` | Tests the **vestigial** netlify function — keeps it as documentation only |
 | `tests/worker-health.test.js` | Tests the worker's `GET /` status page |

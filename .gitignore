@@ -4,3 +4,17 @@ node_modules/
 __pycache__/
 *.zip
 *.pyc
+
+# Capacitor / Android build outputs
+.gradle/
+android/.gradle/
+android/build/
+android/app/build/
+android/local.properties
+android/.idea/
+android/captures/
+*.iml
+# Web assets are copied here by `cap sync`; the source of truth is www/.
+android/app/src/main/assets/public/
+android/app/src/main/assets/capacitor.config.json
+android/app/src/main/assets/capacitor.plugins.json

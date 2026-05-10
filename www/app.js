@@ -1,14 +1,30 @@
 const JERUSALEM_STATION_ID = "680";
 const DEFAULT_OTHER_STATION = "2800";
-const DEFAULT_API_BASE = "https://rail-proxy.idshk-train-ticket-20260414.workers.dev";
-// Local-dev override: localStorage.setItem("apiBase", "http://localhost:8787")
-const API_BASE = (() => {
-  try {
-    return localStorage.getItem("apiBase") || DEFAULT_API_BASE;
-  } catch {
-    return DEFAULT_API_BASE;
-  }
-})();
+
+// Native (Capacitor Android) calls rail-api.rail.co.il directly — no
+// CORS, and we inject the subscription key + browser-like headers
+// from here instead of from a worker. Browser builds keep using the
+// CF Worker proxy because they can't bypass CORS.
+const IS_NATIVE = !!(
+  window.Capacitor &&
+  window.Capacitor.isNativePlatform &&
+  window.Capacitor.isNativePlatform()
+);
+
+const DEFAULT_PROXY_BASE = "https://rail-proxy.idshk-train-ticket-20260414.workers.dev";
+const RAIL_DIRECT_BASE = "https://rail-api.rail.co.il/common/api/v1";
+const SUBSCRIPTION_KEY = "5e64d66cf03f4547bcac5de2de06b566";
+
+// Local-dev override (browser only): localStorage.setItem("apiBase", "http://localhost:8787")
+const API_BASE = IS_NATIVE
+  ? RAIL_DIRECT_BASE
+  : (() => {
+      try {
+        return localStorage.getItem("apiBase") || DEFAULT_PROXY_BASE;
+      } catch {
+        return DEFAULT_PROXY_BASE;
+      }
+    })();
 const bookingHelpers = window.BookingHelpers || {};
 const buildReservationUrl =
   bookingHelpers.buildReservationUrl ||
@@ -95,14 +111,25 @@ function getPhoneCookie() {
   return match ? decodeURIComponent(match[1]) : "";
 }
 
-function setLastToJerusalemStation(stationId) {
-  const expires = new Date();
-  expires.setFullYear(expires.getFullYear() + 1);
-  document.cookie = `lastToJerusalemStation=${encodeURIComponent(stationId)};expires=${expires.toUTCString()};path=/`;
+// Per-direction last-picked station. Two cookies, one per direction —
+// without this, switching from-jerusalem → to-jerusalem → from-jerusalem
+// would carry the to-jerusalem origin into the from-jerusalem destination
+// dropdown.
+function lastStationCookieName(direction) {
+  return direction === "to-jerusalem"
+    ? "lastToJerusalemStation"
+    : "lastFromJerusalemStation";
 }
 
-function getLastToJerusalemStation() {
-  const match = document.cookie.match(/(?:^|; )lastToJerusalemStation=([^;]*)/);
+function setLastStationForDirection(direction, stationId) {
+  const expires = new Date();
+  expires.setFullYear(expires.getFullYear() + 1);
+  document.cookie = `${lastStationCookieName(direction)}=${encodeURIComponent(stationId)};expires=${expires.toUTCString()};path=/`;
+}
+
+function getLastStationForDirection(direction) {
+  const name = lastStationCookieName(direction);
+  const match = document.cookie.match(new RegExp(`(?:^|; )${name}=([^;]*)`));
   return match ? decodeURIComponent(match[1]) : "";
 }
 
@@ -150,7 +177,6 @@ function getAvailableStations() {
 }
 
 function renderStationOptions() {
-  const previousValue = elements.otherStation.value;
   const stations = getAvailableStations();
   elements.stationLabel.textContent = state.direction === "from-jerusalem" ? "תחנת יעד" : "תחנת מוצא";
   elements.otherStation.innerHTML = [
@@ -160,17 +186,14 @@ function renderStationOptions() {
     ),
   ].join("");
 
-  const remembered =
-    state.direction === "to-jerusalem" ? getLastToJerusalemStation() : "";
+  // Each direction has its own remembered station. We deliberately do NOT
+  // fall back to the dropdown's current value across directions — the
+  // to-jerusalem origin and the from-jerusalem destination are independent.
+  const remembered = getLastStationForDirection(state.direction);
   const inList = (id) => stations.some((station) => String(station.stationId) === id);
 
-  // For to-jerusalem, the remembered station wins over the previously-shown
-  // value: the dropdown often holds the from-jerusalem destination at toggle
-  // time, which would otherwise mask the user's saved origin preference.
   if (remembered && inList(remembered)) {
     elements.otherStation.value = remembered;
-  } else if (inList(previousValue)) {
-    elements.otherStation.value = previousValue;
   } else if (inList(DEFAULT_OTHER_STATION)) {
     elements.otherStation.value = DEFAULT_OTHER_STATION;
   } else if (stations[0]) {
@@ -247,10 +270,25 @@ function syncTrainNumberToTime() {
 
 // ── API calls ────────────────────────────────────────────────────────────────
 
+// Mirrors cloudflare-worker/worker.js:18-29 — APIM rejects requests
+// without these. In browser mode the proxy adds them; the fetch API
+// would refuse most of these as forbidden headers anyway.
+function apiHeaders() {
+  if (!IS_NATIVE) return { "Content-Type": "application/json" };
+  return {
+    "Content-Type": "application/json",
+    Accept: "application/json, text/plain, */*",
+    "Accept-Language": "he-IL,he;q=0.9,en-US;q=0.8,en;q=0.7",
+    Origin: "https://www.rail.co.il",
+    Referer: "https://www.rail.co.il/",
+    "Ocp-Apim-Subscription-Key": SUBSCRIPTION_KEY,
+  };
+}
+
 async function apiPost(path, body) {
   const response = await fetch(`${API_BASE}/${path}`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: apiHeaders(),
     credentials: "include",
     body: JSON.stringify(body),
   });
@@ -258,6 +296,28 @@ async function apiPost(path, body) {
     throw new Error(`HTTP ${response.status}: ${await response.text()}`);
   }
   return response.json();
+}
+
+// Native-only: ask Android's SMS User Consent API to watch for the
+// incoming OTP SMS. The system shows a one-tap dialog; on consent we
+// auto-fill the OTP input. Browser builds skip this entirely.
+function armSmsAutoFill() {
+  if (!IS_NATIVE) return;
+  const plugin = window.Capacitor?.Plugins?.SmsUserConsent;
+  if (!plugin) return;
+  plugin
+    .startListening({})
+    .then((result) => {
+      if (!result || !result.otp) return;
+      // Only fill if the user hasn't already typed something.
+      if (elements.otpInput.value && elements.otpInput.value !== "") return;
+      elements.otpInput.value = result.otp;
+      elements.otpInput.dispatchEvent(new Event("input"));
+      elements.otpStatusText.textContent = "קוד אימות מולא אוטומטית";
+    })
+    .catch(() => {
+      // User dismissed, timeout, or platform error — leave manual entry.
+    });
 }
 
 async function sendOtp(phone) {
@@ -377,6 +437,7 @@ async function handleSubmit(event) {
     elements.otpInput.value = "";
     elements.otpStatusText.textContent = "";
     showStep("otp");
+    armSmsAutoFill();
   } catch (error) {
     submitBtn.disabled = false;
     console.error(error);
@@ -504,8 +565,8 @@ async function loadData() {
 function registerEvents() {
   elements.directionGroup.addEventListener("click", handleDirectionClick);
   elements.otherStation.addEventListener("change", () => {
-    if (state.direction === "to-jerusalem" && elements.otherStation.value) {
-      setLastToJerusalemStation(elements.otherStation.value);
+    if (elements.otherStation.value) {
+      setLastStationForDirection(state.direction, elements.otherStation.value);
     }
     updateStatus();
   });

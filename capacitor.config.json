@@ -1,0 +1,16 @@
+{
+  "appId": "com.yomach.trainticket",
+  "appName": "Train Voucher",
+  "webDir": "www",
+  "android": {
+    "allowMixedContent": false
+  },
+  "plugins": {
+    "CapacitorHttp": {
+      "enabled": true
+    },
+    "CapacitorCookies": {
+      "enabled": true
+    }
+  }
+}

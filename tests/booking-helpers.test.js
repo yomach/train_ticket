@@ -1,7 +1,7 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
 
-const { buildReservationUrl, shouldFallbackToRedirect } = require('../booking-helpers.js');
+const { buildReservationUrl, shouldFallbackToRedirect } = require('../www/booking-helpers.js');
 
 test('buildReservationUrl builds the official rail reservation URL', () => {
   const url = buildReservationUrl({
