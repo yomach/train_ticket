@@ -5,6 +5,9 @@ __pycache__/
 *.zip
 *.pyc
 
+# Android signing — never commit passwords
+android/keystore.properties
+
 # Capacitor / Android build outputs
 .gradle/
 android/.gradle/
