@@ -45,13 +45,7 @@ to build dropdowns without hitting the API for trip discovery.
   - Forwards cookies both ways. Rewrites upstream `Set-Cookie` to
     strip `Domain=rail.co.il` so the auth cookie persists on the
     proxy's own origin (otherwise the browser silently drops it).
-  - Allowed CORS origins: idshklein's prod Netlify URL,
-    `localhost:8000`, `127.0.0.1:8000`.
-- **Vestigial proxies** in `netlify/functions/rail-proxy.js` and
-  `netlify/edge-functions/rail-api-proxy.js` — earlier deployment
-  attempts (the upstream maintainer iterated through proxy hosts to
-  dodge WAF). Not wired up. Don't update them on a fix unless you're
-  sending an upstream PR.
+  - Allowed CORS origins: `localhost:8000`, `127.0.0.1:8000`.
 
 ## Running locally
 
@@ -110,8 +104,7 @@ rail.co.il evolves. Two things change periodically:
    "Copy as cURL (bash)".
 3. Diff the captured cURLs against `cloudflare-worker/worker.js` and
    `app.js` — paths, request bodies, subscription key.
-4. Patch only `cloudflare-worker/worker.js` and `app.js`. Leave the
-   `netlify/*` files untouched (they're not deployed anywhere).
+4. Patch `cloudflare-worker/worker.js` and `app.js`.
 
 Alternative low-risk single-shot diagnostic that doesn't burn an SMS:
 one POST to `OrderSeatForTrip` with no auth cookie. Expected: HTTP
@@ -135,19 +128,17 @@ Without rewriting, the browser rejects this on the proxy host.
 ## Deploy
 
 There is no current deploy target — the fork is local-only. The
-upstream maintainer's `train-ticket-idshklein.netlify.app` plus
-`rail-proxy.idshk-train-ticket-20260414.workers.dev` is the only
+upstream maintainer's Cloudflare Worker
+(`rail-proxy.idshk-train-ticket-20260414.workers.dev`) is the only
 public instance, and it's owned by `idshklein`.
 
 If you want to host it yourself:
-- Deploy the FE to your own Netlify (it's just static files).
-- Deploy `cloudflare-worker/worker.js` under a Cloudflare account
-  you control: add your Netlify URL to `ALLOWED_ORIGINS`, then
-  `wrangler deploy`. Update `DEFAULT_API_BASE` in `app.js` to your
-  worker URL. Or, alternatively, use the existing
-  `netlify/functions/rail-proxy.js` (after re-syncing it with the
-  CF worker's current logic) and set `API_BASE` to
-  `/.netlify/functions/rail-proxy` to keep everything on one origin.
+- Serve the `www/` directory as static files (Netlify, Cloudflare Pages,
+  or any static host).
+- Deploy `cloudflare-worker/worker.js` under a Cloudflare account you
+  control: add your static host URL to `ALLOWED_ORIGINS`, then
+  `wrangler deploy`. Update `DEFAULT_PROXY_BASE` in `app.js` to your
+  worker URL.
 
 ## Branch / fork hygiene
 
@@ -190,9 +181,7 @@ The general rule: anything that only exists to make `wrangler dev`
 | `capacitor.config.json` | Capacitor app config (appId, webDir, plugins) |
 | `android/` | Capacitor-generated Android Studio project |
 | `tests/booking-helpers.test.js` | Tests `buildReservationUrl` + redirect heuristic |
-| `tests/rail-proxy.test.js` | Tests the **vestigial** netlify function — keeps it as documentation only |
 | `tests/worker-health.test.js` | Tests the worker's `GET /` status page |
-| `netlify/**` | Vestigial — not deployed anywhere |
 
 ## Conventions
 
