@@ -37,14 +37,111 @@ select {
 }
 
 h1 {
-  margin: 0 0 8px;
+  margin: 0;
   font-size: 1.8rem;
+}
+
+.header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.icon-btn {
+  background: none;
+  border: none;
+  padding: 8px;
+  cursor: pointer;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: background 0.2s;
+}
+
+.icon-btn:hover {
+  background: rgba(0, 0, 0, 0.05);
+  color: var(--accent);
+}
+
+.icon-btn.has-update {
+  position: relative;
+}
+
+.icon-btn.has-update::after {
+  content: "";
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 8px;
+  height: 8px;
+  background: #ff4d4f;
+  border-radius: 50%;
+  border: 2px solid var(--card);
 }
 
 .microcopy {
   margin: 0 0 14px;
   color: var(--muted);
   line-height: 1.5;
+}
+
+/* Modal styles */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.modal-card {
+  background: var(--card);
+  border-radius: 16px;
+  padding: 24px;
+  width: min(400px, 100%);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+}
+
+.modal-card h2 {
+  margin: 0 0 16px;
+}
+
+.version-info {
+  background: var(--bg);
+  border-radius: 12px;
+  padding: 12px;
+  margin-bottom: 16px;
+  font-size: 0.9rem;
+}
+
+.version-info p {
+  margin: 4px 0;
+}
+
+#latestVersion {
+  color: #1a7f44;
+  font-weight: 700;
+}
+
+.repo-link {
+  color: var(--accent);
+  text-decoration: none;
+  font-weight: 600;
+  display: block;
+  margin: 8px 0;
+}
+
+.repo-link:hover {
+  text-decoration: underline;
 }
 
 .direction-group {

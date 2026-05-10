@@ -87,7 +87,17 @@ const elements = {
   resultId: document.getElementById("resultId"),
   qrcode: document.getElementById("qrcode"),
   resetBtn: document.getElementById("resetBtn"),
+  // about
+  aboutBtn: document.getElementById("aboutBtn"),
+  aboutModal: document.getElementById("aboutModal"),
+  closeAboutBtn: document.getElementById("closeAboutBtn"),
+  currentVersion: document.getElementById("currentVersion"),
+  latestVersion: document.getElementById("latestVersion"),
+  latestVersionRow: document.getElementById("latestVersionRow"),
+  latestVersionLink: document.getElementById("latestVersionLink"),
 };
+
+const VERSION = "0.2.0";
 
 // ── Step navigation ──────────────────────────────────────────────────────────
 
@@ -96,6 +106,40 @@ function showStep(step) {
   elements.stepForm.classList.toggle("hidden", step !== "form");
   elements.stepOtp.classList.toggle("hidden", step !== "otp");
   elements.stepResult.classList.toggle("hidden", step !== "result");
+}
+
+function showAbout(visible) {
+  elements.aboutModal.classList.toggle("hidden", !visible);
+  if (visible) {
+    elements.aboutBtn.classList.remove("has-update");
+  }
+}
+
+// ── Version Check ────────────────────────────────────────────────────────────
+
+async function checkVersion() {
+  try {
+    const response = await fetch("https://api.github.com/repos/yomach/train_ticket/releases/latest");
+    if (!response.ok) {
+      elements.latestVersion.textContent = "שגיאה בבדיקה";
+      return;
+    }
+    const data = await response.json();
+    const latest = data.tag_name.replace(/^v/, "");
+
+    elements.currentVersion.textContent = VERSION;
+    elements.latestVersion.textContent = latest;
+    elements.latestVersionLink.href = data.html_url;
+
+    if (latest !== VERSION) {
+      elements.aboutBtn.classList.add("has-update");
+      // Proactively notify the user by showing the About modal if version differs
+      showAbout(true);
+    }
+  } catch (error) {
+    console.error("Failed to check version:", error);
+    elements.latestVersion.textContent = "שגיאה בבדיקה";
+  }
 }
 
 // ── Cookie helpers ───────────────────────────────────────────────────────────
@@ -576,6 +620,11 @@ function registerEvents() {
   elements.otpConfirmBtn.addEventListener("click", handleOtpConfirm);
   elements.otpBackBtn.addEventListener("click", () => showStep("form"));
   elements.resetBtn.addEventListener("click", handleReset);
+  elements.aboutBtn.addEventListener("click", () => showAbout(true));
+  elements.closeAboutBtn.addEventListener("click", () => showAbout(false));
+  elements.aboutModal.addEventListener("click", (e) => {
+    if (e.target === elements.aboutModal) showAbout(false);
+  });
 }
 
 // ── Init ─────────────────────────────────────────────────────────────────────
@@ -583,6 +632,7 @@ function registerEvents() {
 setDefaultDate();
 registerEvents();
 loadData();
+checkVersion();
 
 const savedPhone = getPhoneCookie();
 if (savedPhone) elements.phoneNumber.value = savedPhone;

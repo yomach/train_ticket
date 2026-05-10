@@ -4,12 +4,20 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>יצירת שובר רכבת</title>
+  <link rel="icon" type="image/png" href="../Rail-Voucher-Icon.png" />
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
   <main class="app-shell">
     <section class="card">
-      <h1>יצירת שובר רכבת</h1>
+      <div class="header-row">
+        <h1>יצירת שובר רכבת</h1>
+        <button type="button" id="aboutBtn" class="icon-btn" title="אודות">
+          <svg viewBox="0 0 24 24" width="24" height="24">
+            <path fill="currentColor" d="M11,9H13V7H11M12,20C7.59,20 4,16.41 4,12C4,7.59 7.59,4 12,4C16.41,4 20,7.59 20,12C20,16.41 16.41,20 12,20M12,2C6.47,2 2,6.47 2,12C2,17.53 6.47,22 12,22C17.53,22 22,17.53 22,12C22,6.47 17.53,2 12,2M11,17H13V11H11V17Z" />
+          </svg>
+        </button>
+      </div>
 
       <!-- Step 1: Trip form -->
       <div id="stepForm">
@@ -82,6 +90,21 @@
       </div>
     </section>
   </main>
+
+  <div id="aboutModal" class="modal-overlay hidden">
+    <div class="modal-card">
+      <h2>אודות</h2>
+      <p class="microcopy">אפליקציה ליצירת שובר עליה לרכבת ישראל.</p>
+      <p class="microcopy">נכתב ע"י: <strong>Yoav Romach</strong></p>
+      <div class="version-info">
+        <p>גרסה נוכחית: <span id="currentVersion">0.2.0</span></p>
+        <p id="latestVersionRow">גרסה אחרונה: <a id="latestVersionLink" href="#" target="_blank"><span id="latestVersion">טוען...</span></a></p>
+      </div>
+      <p class="microcopy">פרויקט בקוד פתוח:</p>
+      <a href="https://github.com/yomach/train_ticket" target="_blank" class="repo-link">GitHub Repository</a>
+      <button type="button" id="closeAboutBtn" class="primary-btn" style="margin-top: 20px; width: 100%;">סגור</button>
+    </div>
+  </div>
 
   <script src="vendor/qrcode.min.js"></script>
   <script src="booking-helpers.js"></script>
