@@ -4,10 +4,8 @@ Books a free Israel Railways Jerusalem voucher ticket without going through the
 rail.co.il SPA. Pick a direction, station, date, time, and phone number — the
 app handles the OTP flow and returns a QR code you scan at the gate.
 
-Forked from [idshklein/train_ticket](https://github.com/idshklein/train_ticket)
-by [Ido Klein](https://github.com/idshklein). This fork fixes the API endpoints
-and request bodies after a rail.co.il schema change (May 2026), and wraps the
-app as a sideload-only Android APK via Capacitor so it runs without a server.
+This app is a native-first Android wrapper using Capacitor, allowing it to run 
+without a server or browser challenges.
 
 ## Running locally (browser)
 
@@ -32,4 +30,4 @@ See [ANDROID.md](ANDROID.md) for toolchain setup, build, and sideload instructio
 ## License
 
 BSD 3-Clause. See [LICENSE](LICENSE).
-Original work © Ido Klein. Modifications © 2026 Yoav Romach.
+Copyright © 2026 Yoav Romach.
