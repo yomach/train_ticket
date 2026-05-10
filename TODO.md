@@ -1,0 +1,7 @@
+- [x] Add an about icon \ page with a link to the repo
+- [x] See that the new icons works
+- [ ] Jerusalem Platform Info & Dynamic Sync (See JERUSALEM_PLATFORM_SYNC.md)
+  - [ ] Update Cloudflare Worker to handle RJPA base
+  - [ ] Implement persistent local cache in app.js
+  - [ ] Implement background synchronization from searchTrain API
+  - [ ] Show platform info in time selection and success screen
