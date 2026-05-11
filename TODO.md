@@ -5,3 +5,4 @@
   - [ ] Implement persistent local cache in app.js
   - [ ] Implement background synchronization from searchTrain API
   - [ ] Show platform info in time selection and success screen
+- [ ] Add info on train and date time to the confirmation window
