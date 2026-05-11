@@ -6,3 +6,5 @@
   - [ ] Implement background synchronization from searchTrain API
   - [ ] Show platform info in time selection and success screen
 - [ ] Add info on train and date time to the confirmation window
+- [ ] Grey out continue button when OTP is missing
+- [ ] Auto continue after OTP code is copied from messages
