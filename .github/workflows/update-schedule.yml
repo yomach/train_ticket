@@ -1,0 +1,126 @@
+name: Update rail schedule
+
+on:
+  schedule:
+    # Daily at 04:00 UTC (07:00 IDT / 06:00 IST — morning in Israel).
+    # Israel MOT refreshes the GTFS nightly; the diff-detect step keeps the
+    # repo quiet on no-op days, so daily is cheap.
+    - cron: "0 4 * * *"
+  workflow_dispatch: {}
+  # Run on PRs that touch the workflow or the build script so we can validate
+  # changes before they reach main. The "Open PR" step is gated to skip during
+  # PR runs — we only want to exercise the build + diff logic here.
+  pull_request:
+    paths:
+      - .github/workflows/update-schedule.yml
+      - scripts/build-schedule.js
+      - package.json
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  rebuild:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      # No deps to install — the build script is pure Node + shells out to
+      # unzip. Skip npm ci unless we add deps that the script needs.
+
+      - name: Download MOT GTFS
+        run: |
+          set -euo pipefail
+          curl -fL --retry 3 --retry-delay 5 --max-time 600 \
+            -o /tmp/gtfs.zip \
+            https://gtfs.mot.gov.il/gtfsfiles/israel-public-transportation.zip
+          ls -lh /tmp/gtfs.zip
+
+      - name: Rebuild rail_times_index.json
+        run: node scripts/build-schedule.js /tmp/gtfs.zip www/rail_times_index.json
+
+      - name: Detect real changes
+        id: changes
+        run: |
+          set -euo pipefail
+          # Ignore generatedAt (and generatedFrom in case the upstream filename
+          # changes) so a no-op nightly doesn't churn the repo.
+          if git diff --quiet -- www/rail_times_index.json; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            echo "No changes."
+            exit 0
+          fi
+          diff_payload="$(
+            diff <(jq 'del(.generatedAt,.generatedFrom)' <(git show HEAD:www/rail_times_index.json)) \
+                 <(jq 'del(.generatedAt,.generatedFrom)' www/rail_times_index.json) || true
+          )"
+          if [ -z "$diff_payload" ]; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            echo "Only generatedAt changed; skipping PR."
+            git checkout -- www/rail_times_index.json
+            exit 0
+          fi
+          echo "changed=true" >> "$GITHUB_OUTPUT"
+          echo "Substantive changes detected."
+
+      - name: Build PR body
+        if: steps.changes.outputs.changed == 'true' && github.event_name != 'pull_request'
+        id: prbody
+        run: |
+          set -euo pipefail
+          {
+            echo "Automated rebuild from"
+            echo "<https://gtfs.mot.gov.il/gtfsfiles/israel-public-transportation.zip>."
+            echo ""
+            echo "## Diff summary"
+            echo ""
+            git show HEAD:www/rail_times_index.json > /tmp/prev.json
+            prev_pairs="$(jq '.pairs | keys | sort | .[]' -r /tmp/prev.json | sort -u)"
+            new_pairs="$(jq '.pairs | keys | sort | .[]' -r www/rail_times_index.json | sort -u)"
+            added="$(comm -13 <(echo "$prev_pairs") <(echo "$new_pairs") || true)"
+            removed="$(comm -23 <(echo "$prev_pairs") <(echo "$new_pairs") || true)"
+            if [ -n "$added" ]; then
+              echo "### Added pairs"
+              echo '```'
+              echo "$added"
+              echo '```'
+            fi
+            if [ -n "$removed" ]; then
+              echo "### Removed pairs"
+              echo '```'
+              echo "$removed"
+              echo '```'
+            fi
+            prev_count="$(jq '.pairCount' /tmp/prev.json)"
+            new_count="$(jq '.pairCount' www/rail_times_index.json)"
+            prev_stations="$(jq '.stationCount' /tmp/prev.json)"
+            new_stations="$(jq '.stationCount' www/rail_times_index.json)"
+            echo ""
+            echo "- stationCount: $prev_stations → $new_stations"
+            echo "- pairCount:    $prev_count → $new_count"
+            echo ""
+            echo "Review per-train changes via the file diff below before merging."
+          } > /tmp/pr_body.md
+          {
+            echo "body<<EOF"
+            cat /tmp/pr_body.md
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Open PR
+        if: steps.changes.outputs.changed == 'true' && github.event_name != 'pull_request'
+        uses: peter-evans/create-pull-request@v6
+        with:
+          branch: chore/refresh-rail-schedule
+          base: main
+          commit-message: "chore: refresh rail schedule"
+          title: "chore: refresh rail schedule"
+          body: ${{ steps.prbody.outputs.body }}
+          delete-branch: true
+          add-paths: www/rail_times_index.json
