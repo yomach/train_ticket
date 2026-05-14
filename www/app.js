@@ -105,6 +105,8 @@ const elements = {
   latestVersion: document.getElementById("latestVersion"),
   latestVersionRow: document.getElementById("latestVersionRow"),
   latestVersionLink: document.getElementById("latestVersionLink"),
+  dismissUpdateRow: document.getElementById("dismissUpdateRow"),
+  dismissUpdateCheckbox: document.getElementById("dismissUpdateCheckbox"),
 };
 
 const VERSION = "0.3.0rc2";
@@ -154,8 +156,14 @@ async function checkVersion() {
 
     if (latest !== VERSION) {
       elements.aboutBtn.classList.add("has-update");
-      // Proactively notify the user by showing the About modal if version differs
-      showAbout(true);
+      const dismissed = localStorage.getItem("dismissedUpdateVersion");
+      elements.dismissUpdateCheckbox.checked = dismissed === latest;
+      elements.dismissUpdateRow.dataset.version = latest;
+      elements.dismissUpdateRow.classList.remove("hidden");
+      // Auto-popup only the first time the user sees this latest version.
+      if (dismissed !== latest) showAbout(true);
+    } else {
+      elements.dismissUpdateRow.classList.add("hidden");
     }
   } catch (error) {
     console.error("Failed to check version:", error);
@@ -821,6 +829,15 @@ function registerEvents() {
   elements.closeAboutBtn.addEventListener("click", () => showAbout(false));
   elements.aboutModal.addEventListener("click", (e) => {
     if (e.target === elements.aboutModal) showAbout(false);
+  });
+  elements.dismissUpdateCheckbox.addEventListener("change", () => {
+    const version = elements.dismissUpdateRow.dataset.version;
+    if (!version) return;
+    if (elements.dismissUpdateCheckbox.checked) {
+      localStorage.setItem("dismissedUpdateVersion", version);
+    } else {
+      localStorage.removeItem("dismissedUpdateVersion");
+    }
   });
 }
 
