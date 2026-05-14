@@ -25,7 +25,7 @@ ticket without going through the rail.co.il SPA:
 
 `rail_times_index.json` is a GTFS-derived index of valid `(fromStation,
 toStation, time, trainNumber)` tuples; the FE uses it to build dropdowns
-without hitting the API for trip discovery. It's rebuilt weekly by the
+without hitting the API for trip discovery. It's rebuilt daily by the
 `Update rail schedule` GitHub Action (`scripts/build-schedule.js` + the
 MOT GTFS feed) — the workflow opens a PR when content actually changes,
 ignoring `generatedAt`. The browser also fetches the latest JSON from
@@ -187,12 +187,12 @@ The general rule: anything that only exists to make `wrangler dev`
 | `www/booking-helpers.js` | URL builder + redirect-fallback heuristic, exposed for tests |
 | `www/schedule-helpers.js` | Pure validators / extractors (`isValidScheduleShape`, `sanitizePlatform`, `extractPlatforms`, `tripKey`) — shared by app + Node tests |
 | `www/index.html` | Three steps: form → OTP → result (result includes trip summary + platform line) |
-| `www/rail_times_index.json` | GTFS index of valid trips. Rebuilt weekly by CI |
+| `www/rail_times_index.json` | GTFS index of valid trips. Rebuilt daily by CI |
 | `www/vendor/qrcode.min.js` | Vendored qrcodejs (was a CDN script) |
 | `cloudflare-worker/worker.js` | Path-passthrough proxy for the **browser** build — proxies both `common/api/v1/*` (booking) and `rjpa/api/v1/*` (searchTrain) |
 | `cloudflare-worker/wrangler.toml` | Worker name + compat date |
 | `scripts/build-schedule.js` | GTFS → `rail_times_index.json` builder. Run via `npm run build-schedule -- <gtfs.zip> <out.json>` |
-| `.github/workflows/update-schedule.yml` | Weekly cron + manual `workflow_dispatch`; opens a PR with the rebuilt JSON when content changes |
+| `.github/workflows/update-schedule.yml` | Daily cron + manual `workflow_dispatch`; opens a PR with the rebuilt JSON when content changes |
 | `capacitor.config.json` | Capacitor app config (appId, webDir, plugins) |
 | `android/` | Capacitor-generated Android Studio project. Debug builds get `applicationIdSuffix ".debug"` so they install alongside release |
 | `tests/booking-helpers.test.js` | Tests `buildReservationUrl` + redirect heuristic |

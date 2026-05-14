@@ -138,7 +138,10 @@ async function checkVersion() {
       return;
     }
     const data = await response.json();
-    const latestTag = data?.tags?.latest;
+    // jsDelivr populates tags.latest only for packages that publish formal
+    // releases. For tag-only GitHub repos it's often empty, so fall back to
+    // the first entry in versions[] (jsDelivr orders newest-first).
+    const latestTag = data?.tags?.latest || data?.versions?.[0]?.version;
     if (!latestTag) {
       elements.latestVersion.textContent = "שגיאה בבדיקה";
       return;

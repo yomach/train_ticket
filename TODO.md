@@ -8,5 +8,5 @@
 - [x] Add info on train and date time to the confirmation window
 - [x] Grey out continue button when OTP is missing
 - [x] Auto continue after OTP code is copied from messages
-- [x] Schedule refresh mechanism — weekly CI rebuild + non-blocking remote fetch on app startup
+- [x] Schedule refresh mechanism — daily CI rebuild + non-blocking remote fetch on app startup
 - [x] Move version check from GitHub API (rate-limited) to jsDelivr's package metadata API
