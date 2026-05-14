@@ -63,12 +63,18 @@ npx cap sync android
 
 # Build a debug APK (signed with the auto-generated debug key):
 cd android && ./gradlew assembleDebug
-# → android/app/build/outputs/apk/debug/app-debug.apk
+# → android/app/build/outputs/apk/debug/train_voucher_<version>-debug.apk
 ```
 
-Install over USB (`adb install -r app-debug.apk`) or transfer the
-APK to the phone and tap to install (with "Install unknown apps"
-enabled for the file manager).
+Install over USB (`adb install -r train_voucher_<version>-debug.apk`)
+or transfer the APK to the phone and tap to install (with "Install
+unknown apps" enabled for the file manager).
+
+Debug builds have a distinct `applicationId` (`com.yomach.trainticket.debug`)
+and launcher label (`שובר רכבת (debug)`), so they install alongside a
+release build of the same app without overwriting it. The `versionName`
+includes a `-debug` suffix so the build is easy to identify from the
+About screen.
 
 ## What goes native vs browser
 
@@ -77,7 +83,12 @@ enabled for the file manager).
 | Build  | API base                                           | Headers added      | Cookie domain rewrite |
 |--------|----------------------------------------------------|--------------------|------------------------|
 | Browser | `https://rail-proxy.idshk-train-ticket-...workers.dev` | proxy adds them    | proxy strips `Domain=rail.co.il` |
-| Native  | `https://rail-api.rail.co.il/common/api/v1`        | injected from JS   | not needed (same origin) |
+| Native  | `https://rail-api.rail.co.il` (host root)          | injected from JS   | not needed (same origin) |
+
+Each booking-flow call prefixes the path with `common/api/v1/` (e.g.
+`common/api/v1/Otp/Send`), and platform-info lookups use
+`rjpa/api/v1/timetable/searchTrain`. The worker passes paths through
+verbatim so both namespaces work.
 
 The header set in native mode mirrors `cloudflare-worker/worker.js`'s
 `buildUpstreamHeaders`. If APIM rejects a header set in the future,
@@ -94,6 +105,9 @@ arrives; on consent, the OTP digits are extracted by regex
 - No `RECEIVE_SMS` permission required (User Consent API mediates).
 - 5-minute window. If the SMS doesn't arrive in time, manual entry
   still works.
+- After auto-fill, the FE waits ~600 ms (long enough to read "מולא
+  אוטומטית, ממשיך…") and then auto-submits the OTP. Cancelled if the
+  user backed out of the OTP step in the meantime.
 - Plugin source: `android/app/src/main/java/com/yomach/trainticket/SmsUserConsentPlugin.java`.
 - Registered in `MainActivity.java` via `registerPlugin(SmsUserConsentPlugin.class)`.
 
