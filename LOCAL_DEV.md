@@ -23,9 +23,21 @@ ticket without going through the rail.co.il SPA:
    which the FE renders as a QR code — that's the voucher you scan
    at the gate.
 
-`rail_times_index.json` is a static GTFS-derived index of valid
-`(fromStation, toStation, time, trainNumber)` tuples; the FE uses it
-to build dropdowns without hitting the API for trip discovery.
+`rail_times_index.json` is a GTFS-derived index of valid `(fromStation,
+toStation, time, trainNumber)` tuples; the FE uses it to build dropdowns
+without hitting the API for trip discovery. It's rebuilt weekly by the
+`Update rail schedule` GitHub Action (`scripts/build-schedule.js` + the
+MOT GTFS feed) — the workflow opens a PR when content actually changes,
+ignoring `generatedAt`. The browser also fetches the latest JSON from
+jsDelivr in the background after first paint and applies it if newer
+and valid (only while the user is still on the form step, so the UI
+never gets yanked out from under a booking).
+
+After successful booking, the FE pre-fetches platform numbers via the
+`searchTrain` endpoint (`POST /rjpa/api/v1/timetable/searchTrain`, JSON
+body, `scheduleType: "ByDeparture"`). The request is kicked off the
+moment the user clicks הזמן, so it races OTP delivery and is normally
+already resolved by the time the confirmation page renders.
 
 ## Architecture
 
@@ -171,17 +183,21 @@ The general rule: anything that only exists to make `wrangler dev`
 
 | Path | Purpose |
 |---|---|
-| `www/app.js` | All FE logic: form state, OTP flow, cookies, `apiPost`, native vs browser branch |
+| `www/app.js` | All FE logic: form state, OTP flow, cookies, `apiPost`, native vs browser branch, `searchTrain` pre-fetch, background schedule refresh |
 | `www/booking-helpers.js` | URL builder + redirect-fallback heuristic, exposed for tests |
-| `www/index.html` | Three steps: form → OTP → result |
-| `www/rail_times_index.json` | Pre-built GTFS index (~85KB) of valid trips |
+| `www/schedule-helpers.js` | Pure validators / extractors (`isValidScheduleShape`, `sanitizePlatform`, `extractPlatforms`, `tripKey`) — shared by app + Node tests |
+| `www/index.html` | Three steps: form → OTP → result (result includes trip summary + platform line) |
+| `www/rail_times_index.json` | GTFS index of valid trips. Rebuilt weekly by CI |
 | `www/vendor/qrcode.min.js` | Vendored qrcodejs (was a CDN script) |
-| `cloudflare-worker/worker.js` | The live proxy for the **browser** build — UPSTREAM, headers, CORS, cookie rewrite |
+| `cloudflare-worker/worker.js` | Path-passthrough proxy for the **browser** build — proxies both `common/api/v1/*` (booking) and `rjpa/api/v1/*` (searchTrain) |
 | `cloudflare-worker/wrangler.toml` | Worker name + compat date |
+| `scripts/build-schedule.js` | GTFS → `rail_times_index.json` builder. Run via `npm run build-schedule -- <gtfs.zip> <out.json>` |
+| `.github/workflows/update-schedule.yml` | Weekly cron + manual `workflow_dispatch`; opens a PR with the rebuilt JSON when content changes |
 | `capacitor.config.json` | Capacitor app config (appId, webDir, plugins) |
-| `android/` | Capacitor-generated Android Studio project |
+| `android/` | Capacitor-generated Android Studio project. Debug builds get `applicationIdSuffix ".debug"` so they install alongside release |
 | `tests/booking-helpers.test.js` | Tests `buildReservationUrl` + redirect heuristic |
-| `tests/worker-health.test.js` | Tests the worker's `GET /` status page |
+| `tests/worker-health.test.js` | Tests the worker's `GET /` status page (and that non-root GETs are proxied) |
+| `tests/schedule-helpers.test.js` | Tests `isValidScheduleShape` / `sanitizePlatform` / `extractPlatforms` / `tripKey`; live-validates bundled `rail_times_index.json` |
 
 ## Conventions
 

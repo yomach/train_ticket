@@ -1,6 +1,6 @@
 - [x] Add an about icon \ page with a link to the repo
 - [x] See that the new icons works
-- [x] Jerusalem Platform Info & Dynamic Sync (See JERUSALEM_PLATFORM_SYNC.md)
+- [x] Jerusalem Platform Info & Dynamic Sync
   - [x] Worker accepts both `common/api/v1/*` (booking) and `rjpa/api/v1/*` (searchTrain) paths
   - [x] Persistent localStorage cache for the schedule JSON (validated; corrupt entries removed on next load)
   - [x] Pre-fetch `searchTrain` at submit time so platform info is ready by the time `showResult` runs
