@@ -70,8 +70,12 @@ so both `/common/api/v1/Otp/Send` and `/rjpa/api/v1/timetable/searchTrain`
 get proxied. App-side callsites prefix their paths accordingly (`sendOtp`,
 `verifyOtp`, `orderSeat`).
 
-`shouldServeStatusPage` was narrowed to GET-on-root (or `/health`) so GET
-`searchTrain` requests reach upstream.
+`searchTrain` is `POST /rjpa/api/v1/timetable/searchTrain` with a JSON body
+(`fromStation`, `toStation`, `date`, `hour`, `scheduleType: "ByDeparture"`,
+`systemType: "2"`, `languageId: "Hebrew"`). Returns `result.travels[].trains[]`
+with `originPlatform` / `destPlatform` per leg; we look up by exact
+`trainNumber` identity. `shouldServeStatusPage` was narrowed to GET-on-root
+(or `/health`) so non-root GETs aren't intercepted as status probes.
 
 ### Pre-fetch on submit
 
@@ -93,7 +97,8 @@ and writes a single line:
 - Boarding platform: `עליה מרציף N`
 - Destination platform: `ירידה ברציף M`
 - **Jerusalem arrivals only**: append exit-side based on parity —
-  odd platform → `(לצד שמאל)`, even → `(לצד ימין)`.
+  odd platforms (1, 3) → `לצד ימין עם כיוון הנסיעה`,
+  even (2, 4) → `לצד שמאל עם כיוון הנסיעה`.
 
 Any failure (network, malformed response, out-of-range platform, mismatched
 train number) leaves `#platformInfo` hidden silently. The QR is the

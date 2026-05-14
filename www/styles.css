@@ -203,6 +203,12 @@ select {
   cursor: pointer;
 }
 
+.primary-btn:disabled,
+.primary-btn[disabled] {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 .hidden {
   display: none;
 }
