@@ -109,7 +109,7 @@ const elements = {
   dismissUpdateCheckbox: document.getElementById("dismissUpdateCheckbox"),
 };
 
-const VERSION = "0.3.0rc2";
+const VERSION = "0.3.0";
 
 // ── Step navigation ──────────────────────────────────────────────────────────
 
