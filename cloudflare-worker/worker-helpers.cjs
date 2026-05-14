@@ -1,5 +1,7 @@
-function shouldServeStatusPage(method = '') {
-  return String(method).toUpperCase() === 'GET';
+function shouldServeStatusPage(method = '', pathname = '/') {
+  if (String(method).toUpperCase() !== 'GET') return false;
+  const path = String(pathname || '/').replace(/\/+$/, '') || '/';
+  return path === '/' || path === '/health';
 }
 
 function buildStatusPayload(path = '/') {

@@ -12,7 +12,10 @@ const IS_NATIVE = !!(
 );
 
 const DEFAULT_PROXY_BASE = "https://rail-proxy.idshk-train-ticket-20260414.workers.dev";
-const RAIL_DIRECT_BASE = "https://rail-api.rail.co.il/common/api/v1";
+// Host root — callers append the full path (common/api/v1/* for booking,
+// rjpa/api/v1/* for searchTrain). Mirrors the worker's pass-through model.
+const RAIL_DIRECT_BASE = "https://rail-api.rail.co.il";
+const REMOTE_SCHEDULE_URL = "https://cdn.jsdelivr.net/gh/yomach/train_ticket@main/www/rail_times_index.json";
 const SUBSCRIPTION_KEY = "5e64d66cf03f4547bcac5de2de06b566";
 
 // Local-dev override (browser only): localStorage.setItem("apiBase", "http://localhost:8787")
@@ -59,7 +62,12 @@ const state = {
   step: "form", // "form" | "otp" | "result"
   phone: "",
   tripParams: null,
+  // Platform info pre-fetched at submit; consumed at showResult.
+  platformInfoPromise: null,
+  platformInfoTripKey: "",
 };
+
+const { isValidScheduleShape, sanitizePlatform, extractPlatforms, tripKey } = window.ScheduleHelpers;
 
 const elements = {
   directionGroup: document.getElementById("directionGroup"),
@@ -85,6 +93,8 @@ const elements = {
   otpConfirmBtn: document.getElementById("otpConfirmBtn"),
   // result
   resultId: document.getElementById("resultId"),
+  tripSummary: document.getElementById("tripSummary"),
+  platformInfo: document.getElementById("platformInfo"),
   qrcode: document.getElementById("qrcode"),
   resetBtn: document.getElementById("resetBtn"),
   // about
@@ -97,7 +107,7 @@ const elements = {
   latestVersionLink: document.getElementById("latestVersionLink"),
 };
 
-const VERSION = "0.2.0";
+const VERSION = "0.3.0";
 
 // ── Step navigation ──────────────────────────────────────────────────────────
 
@@ -118,18 +128,26 @@ function showAbout(visible) {
 // ── Version Check ────────────────────────────────────────────────────────────
 
 async function checkVersion() {
+  // jsDelivr instead of GitHub API: GitHub limits unauth requests to 60/hr
+  // per IP — bad on shared mobile NATs. jsDelivr's metadata API has no such
+  // limit. Tradeoff: no release URL in the response — we construct it.
   try {
-    const response = await fetch("https://api.github.com/repos/yomach/train_ticket/releases/latest");
+    const response = await fetch("https://data.jsdelivr.com/v1/packages/gh/yomach/train_ticket");
     if (!response.ok) {
       elements.latestVersion.textContent = "שגיאה בבדיקה";
       return;
     }
     const data = await response.json();
-    const latest = data.tag_name.replace(/^v/, "");
+    const latestTag = data?.tags?.latest;
+    if (!latestTag) {
+      elements.latestVersion.textContent = "שגיאה בבדיקה";
+      return;
+    }
+    const latest = String(latestTag).replace(/^v/, "");
 
     elements.currentVersion.textContent = VERSION;
     elements.latestVersion.textContent = latest;
-    elements.latestVersionLink.href = data.html_url;
+    elements.latestVersionLink.href = `https://github.com/yomach/train_ticket/releases/tag/v${latest}`;
 
     if (latest !== VERSION) {
       elements.aboutBtn.classList.add("has-update");
@@ -357,7 +375,13 @@ function armSmsAutoFill() {
       if (elements.otpInput.value && elements.otpInput.value !== "") return;
       elements.otpInput.value = result.otp;
       elements.otpInput.dispatchEvent(new Event("input"));
-      elements.otpStatusText.textContent = "קוד אימות מולא אוטומטית";
+      elements.otpStatusText.textContent = "קוד אימות מולא אוטומטית, ממשיך...";
+      // Brief delay so the user can see the auto-fill before we submit.
+      setTimeout(() => {
+        if (state.step !== "otp") return;
+        if (elements.otpConfirmBtn.disabled) return;
+        handleOtpConfirm();
+      }, 600);
     })
     .catch(() => {
       // User dismissed, timeout, or platform error — leave manual entry.
@@ -365,7 +389,7 @@ function armSmsAutoFill() {
 }
 
 async function sendOtp(phone) {
-  return apiPost("Otp/Send", {
+  return apiPost("common/api/v1/Otp/Send", {
     userContact: phone,
     type: "phone",
     languageId: "Hebrew",
@@ -373,7 +397,7 @@ async function sendOtp(phone) {
 }
 
 async function verifyOtp(phone, otp) {
-  return apiPost("Otp/Verify", {
+  return apiPost("common/api/v1/Otp/Verify", {
     userContact: phone,
     type: "phone",
     otp,
@@ -382,7 +406,7 @@ async function verifyOtp(phone, otp) {
 }
 
 async function orderSeat(params) {
-  return apiPost("TripReservation/OrderSeatForTrip", {
+  return apiPost("common/api/v1/TripReservation/OrderSeatForTrip", {
     fromStation: params.fromStation,
     toStation: params.toStation,
     departureDate: params.date,
@@ -392,6 +416,39 @@ async function orderSeat(params) {
     type: "phone",
     languageId: "Hebrew",
   });
+}
+
+// ── Platform info (searchTrain) ──────────────────────────────────────────────
+
+async function fetchPlatformInfo({ fromStation, toStation, date, time, trainNumber }) {
+  const params = new URLSearchParams({
+    fromStation, toStation, date,
+    hour: time,
+    scheduleType: "Departure",
+    systemType: "2",
+    languageId: "Hebrew",
+  });
+  const url = `${API_BASE}/rjpa/api/v1/timetable/searchTrain?${params}`;
+
+  for (let attempt = 0; attempt < 2; attempt++) {
+    try {
+      const res = await fetch(url, {
+        headers: apiHeaders(),
+        credentials: "include",
+        signal: AbortSignal.timeout(8_000),
+      });
+      if (!res.ok) {
+        if (res.status >= 500 && attempt === 0) continue;
+        return null;
+      }
+      const data = await res.json();
+      return extractPlatforms(data, trainNumber);
+    } catch (e) {
+      if (attempt === 0 && /Abort|Network|fetch/i.test(String(e?.message))) continue;
+      return null;
+    }
+  }
+  return null;
 }
 
 function redirectToOfficialBooking(params, statusElement) {
@@ -440,6 +497,11 @@ async function handleSubmit(event) {
     trainType: elements.trainType.value || "empty",
   };
 
+  // Kick off platform lookup in parallel with orderSeat / OTP flow — by the
+  // time showResult runs it's almost always already resolved.
+  state.platformInfoTripKey = tripKey(state.tripParams);
+  state.platformInfoPromise = fetchPlatformInfo(state.tripParams);
+
   const submitBtn = elements.voucherForm.querySelector("button[type=submit]");
   submitBtn.disabled = true;
   elements.statusText.textContent = "מזמין מקום...";
@@ -451,7 +513,7 @@ async function handleSubmit(event) {
     if (data.statusCode === 200 && data.result?.success && confirmationCode) {
       submitBtn.disabled = false;
       elements.statusText.textContent = "";
-      showResult(confirmationCode);
+      await showResult(confirmationCode);
       return;
     }
     throw new Error(JSON.stringify(data.errorMessages || data));
@@ -479,6 +541,7 @@ async function handleSubmit(event) {
     submitBtn.disabled = false;
     elements.otpPrompt.textContent = `קוד אימות נשלח למספר ${phone}. יש להזין אותו כאן:`;
     elements.otpInput.value = "";
+    elements.otpConfirmBtn.disabled = true;
     elements.otpStatusText.textContent = "";
     showStep("otp");
     armSmsAutoFill();
@@ -534,7 +597,7 @@ async function handleOtpConfirm() {
       throw new Error(JSON.stringify(data.errorMessages || data));
     }
 
-    showResult(confirmationCode);
+    await showResult(confirmationCode);
   } catch (error) {
     console.error(error);
 
@@ -551,7 +614,45 @@ async function handleOtpConfirm() {
 
 // ── Result + barcode (step 3) ────────────────────────────────────────────────
 
-function showResult(resultId) {
+function renderTripSummary() {
+  if (!elements.tripSummary || !state.tripParams) return;
+  const findName = (id) => {
+    const match = state.stations.find((s) => String(s.stationId) === String(id));
+    return match?.stationName || String(id);
+  };
+  const fromName = findName(state.tripParams.fromStation);
+  const toName = findName(state.tripParams.toStation);
+  const { date, time, trainNumber } = state.tripParams;
+  // RTL: ← reads as "to" in the visual flow, matching the dropdown labels.
+  elements.tripSummary.textContent = `${fromName} ← ${toName} • ${date} ${time} • רכבת ${trainNumber}`;
+}
+
+function renderPlatformLine(info) {
+  if (!elements.platformInfo) return;
+  const lines = [];
+  if (info?.originPlatform != null) {
+    lines.push(`עליה מרציף ${info.originPlatform}`);
+  }
+  if (info?.destPlatform != null) {
+    const isJerusalem = state.tripParams?.toStation === JERUSALEM_STATION_ID;
+    if (isJerusalem) {
+      // Odd platforms exit left, even exit right at Yitzhak Navon.
+      const side = info.destPlatform % 2 === 1 ? "שמאל" : "ימין";
+      lines.push(`ירידה ברציף ${info.destPlatform} (לצד ${side})`);
+    } else {
+      lines.push(`ירידה ברציף ${info.destPlatform}`);
+    }
+  }
+  if (lines.length) {
+    elements.platformInfo.textContent = lines.join(" • ");
+    elements.platformInfo.classList.remove("hidden");
+  } else {
+    elements.platformInfo.classList.add("hidden");
+    elements.platformInfo.textContent = "";
+  }
+}
+
+async function showResult(resultId) {
   elements.resultId.textContent = resultId;
 
   elements.qrcode.innerHTML = "";
@@ -563,12 +664,38 @@ function showResult(resultId) {
     colorLight: "#ffffff",
   });
 
+  renderTripSummary();
+
+  if (elements.platformInfo) {
+    elements.platformInfo.classList.add("hidden");
+    elements.platformInfo.textContent = "";
+  }
+
   showStep("result");
+
+  // Consume the pre-fetch kicked off at submit. Usually already resolved.
+  const expectedKey = tripKey(state.tripParams);
+  const promise = state.platformInfoPromise;
+  if (!promise || state.platformInfoTripKey !== expectedKey) return;
+
+  let info = null;
+  try {
+    info = await promise;
+  } catch {
+    return;
+  }
+  // User may have started a new booking while we awaited.
+  if (!info || state.platformInfoTripKey !== expectedKey) return;
+  if (state.step !== "result") return;
+
+  renderPlatformLine(info);
 }
 
 function handleReset() {
   showStep("form");
   elements.statusText.textContent = "";
+  state.platformInfoPromise = null;
+  state.platformInfoTripKey = "";
 }
 
 // ── Direction toggle ─────────────────────────────────────────────────────────
@@ -588,20 +715,79 @@ function handleDirectionClick(event) {
 
 // ── Data loading ─────────────────────────────────────────────────────────────
 
+const SCHEDULE_CACHE_KEY = "scheduleCache";
+
+function applySchedule(data) {
+  state.stations = data.stations || [];
+  state.pairs = data.pairs || {};
+  state.meta = data;
+  renderStationOptions();
+  updateStatus();
+}
+
+function readScheduleCache() {
+  try {
+    const raw = localStorage.getItem(SCHEDULE_CACHE_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    if (!isValidScheduleShape(parsed)) {
+      localStorage.removeItem(SCHEDULE_CACHE_KEY);
+      return null;
+    }
+    return parsed;
+  } catch {
+    try { localStorage.removeItem(SCHEDULE_CACHE_KEY); } catch {}
+    return null;
+  }
+}
+
+async function refreshScheduleInBackground() {
+  // 1. Apply a newer cached copy if present (no network needed).
+  const cached = readScheduleCache();
+  if (cached && (!state.meta?.generatedAt || cached.generatedAt > state.meta.generatedAt)) {
+    if (state.step === "form") applySchedule(cached);
+  }
+
+  // 2. Try to refresh from the CDN.
+  let remote = null;
+  try {
+    const res = await fetch(REMOTE_SCHEDULE_URL, { signal: AbortSignal.timeout(10_000) });
+    if (!res.ok) return;
+    remote = await res.json();
+  } catch (e) {
+    console.warn("Schedule refresh fetch failed:", e?.message || e);
+    return;
+  }
+  if (!isValidScheduleShape(remote)) {
+    console.warn("Schedule refresh: remote payload failed validation");
+    return;
+  }
+  if (state.meta?.generatedAt && !(remote.generatedAt > state.meta.generatedAt)) return;
+
+  try {
+    localStorage.setItem(SCHEDULE_CACHE_KEY, JSON.stringify(remote));
+  } catch (e) {
+    console.warn("Schedule refresh: could not persist cache:", e?.message || e);
+  }
+  // Don't yank the UI under a user mid-OTP or viewing a result — the cache will
+  // pick up next session either way.
+  if (state.step === "form") applySchedule(remote);
+}
+
 async function loadData() {
   try {
     const response = await fetch("rail_times_index.json");
     const data = await response.json();
-    state.stations = data.stations || [];
-    state.pairs = data.pairs || {};
-    state.meta = data;
-
-    renderStationOptions();
-    updateStatus();
+    if (!isValidScheduleShape(data)) throw new Error("bundled rail_times_index.json failed validation");
+    applySchedule(data);
   } catch (error) {
     elements.statusText.textContent = "טעינת נתוני ה-GTFS נכשלה.";
     console.error(error);
+    return;
   }
+
+  // Fire-and-forget — never awaited.
+  refreshScheduleInBackground();
 }
 
 // ── Event registration ───────────────────────────────────────────────────────
@@ -617,6 +803,9 @@ function registerEvents() {
   elements.tripDate.addEventListener("change", updateStatus);
   elements.tripTime.addEventListener("change", syncTrainNumberToTime);
   elements.voucherForm.addEventListener("submit", handleSubmit);
+  elements.otpInput.addEventListener("input", () => {
+    elements.otpConfirmBtn.disabled = elements.otpInput.value.trim() === "";
+  });
   elements.otpConfirmBtn.addEventListener("click", handleOtpConfirm);
   elements.otpBackBtn.addEventListener("click", () => showStep("form"));
   elements.resetBtn.addEventListener("click", handleReset);
