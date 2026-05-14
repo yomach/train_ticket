@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.3.0] - 2026-05-15
+
+### Added
+- **Platform info on the booking confirmation.** Boarding and arrival platforms appear under the QR. For trips arriving at Yitzhak Navon the line also tells you which side to exit ("לצד ימין/שמאל עם כיוון הנסיעה").
+- **Trip details on the confirmation.** Stations, date, time and train number are shown above the QR so you can sanity-check the booking before scanning.
+- **OTP screen no longer lets you tap "אמת והזמן" when the field is empty.** Once the SMS arrives (Android), the OTP is filled in and submitted automatically.
+- **The schedule stays current on its own.** The app updates train times in the background after launch, so retimed trains and new stations show up without waiting for a new app version.
+- **"Don't show again" option for the update notification.** When a new version is detected the About modal pops up; you can now tick a box to suppress the popup for that specific version (the badge still shows so you can open About manually).
+
+### Changed
+- Debug and release builds can be installed side-by-side on the same device — the debug build shows up as "שובר רכבת (debug)".
+
 ## [0.2.0] - 2026-05-10
 
 ### Added

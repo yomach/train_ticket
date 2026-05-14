@@ -13,8 +13,8 @@ android {
         applicationId "com.yomach.trainticket"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 2
-        versionName "0.2.0"
+        versionCode 5
+        versionName "0.3.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
              // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.
@@ -33,14 +33,25 @@ android {
         }
     }
     buildTypes {
+        debug {
+            // Distinct applicationId + label so debug builds can be installed
+            // alongside a release build of the same app on the same device.
+            applicationIdSuffix ".debug"
+            versionNameSuffix "-debug"
+            resValue "string", "app_name", "שובר רכבת (debug)"
+        }
         release {
             signingConfig signingConfigs.release
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            resValue "string", "app_name", "שובר רכבת"
         }
     }
     applicationVariants.all { variant ->
         variant.outputs.all {
+            // versionName already carries "-debug" via versionNameSuffix, so
+            // release builds get e.g. train_voucher_0.3.0.apk and debug builds
+            // get train_voucher_0.3.0-debug.apk.
             outputFileName = "train_voucher_${variant.versionName}.apk"
         }
     }

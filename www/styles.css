@@ -132,6 +132,31 @@ h1 {
   font-weight: 700;
 }
 
+.dismiss-update {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+
+.dismiss-update input[type="checkbox"] {
+  width: auto;
+  padding: 0;
+  margin: 0;
+  border-radius: 0;
+  border: none;
+  background: transparent;
+  flex-shrink: 0;
+}
+
+.dismiss-update span {
+  flex: 1;
+  text-align: center;
+  white-space: nowrap;
+}
+
 .repo-link {
   color: var(--accent);
   text-decoration: none;
@@ -201,6 +226,12 @@ select {
   background: var(--accent);
   color: #fff;
   cursor: pointer;
+}
+
+.primary-btn:disabled,
+.primary-btn[disabled] {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .hidden {

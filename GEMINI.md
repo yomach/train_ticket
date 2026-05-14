@@ -15,11 +15,9 @@
 - **Set Dev Base:** In browser console: `localStorage.setItem('apiBase', 'http://localhost:8787'); location.reload();`
 - **Test:** `npm test` (Node.js test runner)
 
-### Android Build
-- **Setup Env:** `source ~/.local/opt/android-env.sh`
-- **Sync Web Assets:** `npx cap sync android`
-- **Build APK:** `cd android && ./gradlew assembleDebug`
-- **Install:** `adb install -r android/app/build/outputs/apk/debug/app-debug.apk`
+### Release Flow
+- **Tagging:** `git tag -a vX.Y.Z -m "Release version X.Y.Z" && git push origin vX.Y.Z`
+- **Create Release:** Use `gh release create vX.Y.Z ...` to publish the APK.
 
 ## Maintenance & Debugging
 - **API Breakers:** rail.co.il rotates `Ocp-Apim-Subscription-Key` and endpoint schemas.
