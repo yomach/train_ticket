@@ -2,9 +2,10 @@ name: Update rail schedule
 
 on:
   schedule:
-    # Mondays 04:00 UTC. Israel MOT refreshes the GTFS nightly; weekly is
-    # plenty given how rarely the schedule actually changes.
-    - cron: "0 4 * * 1"
+    # Daily at 04:00 UTC (07:00 IDT / 06:00 IST — morning in Israel).
+    # Israel MOT refreshes the GTFS nightly; the diff-detect step keeps the
+    # repo quiet on no-op days, so daily is cheap.
+    - cron: "0 4 * * *"
   workflow_dispatch: {}
 
 permissions:
