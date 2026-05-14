@@ -1,10 +1,12 @@
 - [x] Add an about icon \ page with a link to the repo
 - [x] See that the new icons works
-- [ ] Jerusalem Platform Info & Dynamic Sync (See JERUSALEM_PLATFORM_SYNC.md)
-  - [ ] Update Cloudflare Worker to handle RJPA base
-  - [ ] Implement persistent local cache in app.js
-  - [ ] Implement background synchronization from searchTrain API
-  - [ ] Show platform info in time selection and success screen
-- [ ] Add info on train and date time to the confirmation window
-- [ ] Grey out continue button when OTP is missing
-- [ ] Auto continue after OTP code is copied from messages
+- [x] Jerusalem Platform Info & Dynamic Sync (See JERUSALEM_PLATFORM_SYNC.md)
+  - [x] Worker accepts both `common/api/v1/*` (booking) and `rjpa/api/v1/*` (searchTrain) paths
+  - [x] Persistent localStorage cache for the schedule JSON (validated; corrupt entries removed on next load)
+  - [x] Pre-fetch `searchTrain` at submit time so platform info is ready by the time `showResult` runs
+  - [x] Show platform info on the success screen (with Jerusalem exit-side hint)
+- [x] Add info on train and date time to the confirmation window
+- [x] Grey out continue button when OTP is missing
+- [x] Auto continue after OTP code is copied from messages
+- [x] Schedule refresh mechanism — weekly CI rebuild + non-blocking remote fetch on app startup
+- [x] Move version check from GitHub API (rate-limited) to jsDelivr's package metadata API

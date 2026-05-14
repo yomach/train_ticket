@@ -1,7 +1,10 @@
 import helpers from "./worker-helpers.cjs";
 
 const { shouldServeStatusPage, buildStatusPayload } = helpers;
-const UPSTREAM = "https://rail-api.rail.co.il/common/api/v1";
+// Host root — callers supply the full path (e.g. /common/api/v1/Otp/Send or
+// /rjpa/api/v1/timetable/searchTrain). searchTrain lives under rjpa, booking
+// endpoints under common/api/v1, so the worker passes paths through verbatim.
+const UPSTREAM = "https://rail-api.rail.co.il";
 const ALLOWED_ORIGINS = new Set([
   "https://train-ticket-idshklein.netlify.app",
   "http://localhost:8000",
@@ -9,9 +12,10 @@ const ALLOWED_ORIGINS = new Set([
 ]);
 const DEFAULT_ORIGIN = "https://train-ticket-idshklein.netlify.app";
 
-function buildUpstreamUrl(pathname = "") {
+function buildUpstreamUrl(pathname = "", search = "") {
   const tail = String(pathname).replace(/^\/+/, "");
-  return tail ? `${UPSTREAM}/${tail}` : UPSTREAM;
+  const base = tail ? `${UPSTREAM}/${tail}` : UPSTREAM;
+  return search ? `${base}${search}` : base;
 }
 
 function buildUpstreamHeaders(cookieHeader) {
@@ -58,7 +62,7 @@ export default {
     const origin = request.headers.get("Origin") || "";
     const url = new URL(request.url);
 
-    if (shouldServeStatusPage(request.method)) {
+    if (shouldServeStatusPage(request.method, url.pathname)) {
       const responseHeaders = new Headers(corsHeaders(origin));
       responseHeaders.set("Content-Type", "application/json; charset=utf-8");
       responseHeaders.set("Cache-Control", "no-store");
@@ -74,7 +78,7 @@ export default {
       return new Response(null, { status: 204, headers: corsHeaders(origin) });
     }
 
-    const upstreamUrl = buildUpstreamUrl(url.pathname);
+    const upstreamUrl = buildUpstreamUrl(url.pathname, url.search);
     const body = request.method === "GET" || request.method === "HEAD" ? undefined : await request.text();
 
     const response = await fetch(upstreamUrl, {
