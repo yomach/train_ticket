@@ -107,7 +107,7 @@ const elements = {
   latestVersionLink: document.getElementById("latestVersionLink"),
 };
 
-const VERSION = "0.3.0";
+const VERSION = "0.3.0rc2";
 
 // ── Step navigation ──────────────────────────────────────────────────────────
 
@@ -421,20 +421,24 @@ async function orderSeat(params) {
 // ── Platform info (searchTrain) ──────────────────────────────────────────────
 
 async function fetchPlatformInfo({ fromStation, toStation, date, time, trainNumber }) {
-  const params = new URLSearchParams({
+  // searchTrain is POST with JSON (confirmed against the deployed API and
+  // sh0oki/israel-rail-api). scheduleType is "ByDeparture", not "Departure".
+  const url = `${API_BASE}/rjpa/api/v1/timetable/searchTrain`;
+  const body = JSON.stringify({
     fromStation, toStation, date,
     hour: time,
-    scheduleType: "Departure",
+    scheduleType: "ByDeparture",
     systemType: "2",
     languageId: "Hebrew",
   });
-  const url = `${API_BASE}/rjpa/api/v1/timetable/searchTrain?${params}`;
 
   for (let attempt = 0; attempt < 2; attempt++) {
     try {
       const res = await fetch(url, {
+        method: "POST",
         headers: apiHeaders(),
         credentials: "include",
+        body,
         signal: AbortSignal.timeout(8_000),
       });
       if (!res.ok) {
@@ -636,9 +640,10 @@ function renderPlatformLine(info) {
   if (info?.destPlatform != null) {
     const isJerusalem = state.tripParams?.toStation === JERUSALEM_STATION_ID;
     if (isJerusalem) {
-      // Odd platforms exit left, even exit right at Yitzhak Navon.
-      const side = info.destPlatform % 2 === 1 ? "שמאל" : "ימין";
-      lines.push(`ירידה ברציף ${info.destPlatform} (לצד ${side})`);
+      // Odd platforms (1, 3) exit right; even (2, 4) exit left — "with the
+      // direction of travel" at Yitzhak Navon.
+      const side = info.destPlatform % 2 === 1 ? "ימין" : "שמאל";
+      lines.push(`ירידה ברציף ${info.destPlatform} לצד ${side} עם כיוון הנסיעה`);
     } else {
       lines.push(`ירידה ברציף ${info.destPlatform}`);
     }
