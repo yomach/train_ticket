@@ -15,6 +15,10 @@ const DEFAULT_PROXY_BASE = "https://rail-proxy.idshk-train-ticket-20260414.worke
 // Host root — callers append the full path (common/api/v1/* for booking,
 // rjpa/api/v1/* for searchTrain). Mirrors the worker's pass-through model.
 const RAIL_DIRECT_BASE = "https://rail-api.rail.co.il";
+// `@main` follows whatever lands on the default branch — intentional, so a
+// daily-CI refresh reaches installed clients without rebuilding the APK. The
+// trade-off: rename/delete/hard-reset of `main` silently breaks refresh for
+// already-installed clients (they degrade to the bundled JSON).
 const REMOTE_SCHEDULE_URL = "https://cdn.jsdelivr.net/gh/yomach/train_ticket@main/www/rail_times_index.json";
 const SUBSCRIPTION_KEY = "5e64d66cf03f4547bcac5de2de06b566";
 
@@ -67,6 +71,10 @@ const state = {
   platformInfoTripKey: "",
 };
 
+if (!window.ScheduleHelpers) {
+  document.getElementById("statusText")?.replaceChildren("שגיאה בטעינת מודול העזר.");
+  throw new Error("ScheduleHelpers script failed to load");
+}
 const { isValidScheduleShape, sanitizePlatform, extractPlatforms, tripKey } = window.ScheduleHelpers;
 
 const elements = {
@@ -152,7 +160,7 @@ async function checkVersion() {
 
     elements.currentVersion.textContent = VERSION;
     elements.latestVersion.textContent = latest;
-    elements.latestVersionLink.href = `https://github.com/yomach/train_ticket/releases/tag/v${latest}`;
+    elements.latestVersionLink.href = `https://github.com/yomach/train_ticket/releases/tag/v${encodeURIComponent(latest)}`;
 
     if (latest !== VERSION) {
       elements.aboutBtn.classList.add("has-update");
