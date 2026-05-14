@@ -7,6 +7,14 @@ on:
     # repo quiet on no-op days, so daily is cheap.
     - cron: "0 4 * * *"
   workflow_dispatch: {}
+  # Run on PRs that touch the workflow or the build script so we can validate
+  # changes before they reach main. The "Open PR" step is gated to skip during
+  # PR runs — we only want to exercise the build + diff logic here.
+  pull_request:
+    paths:
+      - .github/workflows/update-schedule.yml
+      - scripts/build-schedule.js
+      - package.json
 
 permissions:
   contents: write
@@ -62,7 +70,7 @@ jobs:
           echo "Substantive changes detected."
 
       - name: Build PR body
-        if: steps.changes.outputs.changed == 'true'
+        if: steps.changes.outputs.changed == 'true' && github.event_name != 'pull_request'
         id: prbody
         run: |
           set -euo pipefail
@@ -106,7 +114,7 @@ jobs:
           } >> "$GITHUB_OUTPUT"
 
       - name: Open PR
-        if: steps.changes.outputs.changed == 'true'
+        if: steps.changes.outputs.changed == 'true' && github.event_name != 'pull_request'
         uses: peter-evans/create-pull-request@v6
         with:
           branch: chore/refresh-rail-schedule
