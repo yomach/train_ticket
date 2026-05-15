@@ -137,6 +137,35 @@ function showAbout(visible) {
 
 // ── Version Check ────────────────────────────────────────────────────────────
 
+// Returns -1/0/+1 if a<b/a==b/a>b, or null if either side can't be parsed.
+// Accepts "[v]MAJOR.MINOR.PATCH[suffix]". At the same X.Y.Z, no-suffix beats
+// any suffix (stable > prerelease); among prereleases, natural-sort the
+// suffix so "rc2" < "rc10".
+function compareVersions(a, b) {
+  const parse = (v) => {
+    const m = String(v).replace(/^v/, "").match(/^(\d+)\.(\d+)\.(\d+)(.*)$/);
+    return m ? { major: +m[1], minor: +m[2], patch: +m[3], pre: m[4] || "" } : null;
+  };
+  const tokenize = (s) => (s.match(/\d+|\D+/g) || []).map((t) => /^\d+$/.test(t) ? +t : t);
+  const pa = parse(a), pb = parse(b);
+  if (!pa || !pb) return null;
+  for (const k of ["major", "minor", "patch"]) {
+    if (pa[k] !== pb[k]) return pa[k] < pb[k] ? -1 : 1;
+  }
+  if (!pa.pre && !pb.pre) return 0;
+  if (!pa.pre) return 1;
+  if (!pb.pre) return -1;
+  const ta = tokenize(pa.pre), tb = tokenize(pb.pre);
+  for (let i = 0; i < Math.max(ta.length, tb.length); i++) {
+    const xa = ta[i], xb = tb[i];
+    if (xa === undefined) return -1;
+    if (xb === undefined) return 1;
+    if (typeof xa !== typeof xb) return typeof xa === "number" ? -1 : 1;
+    if (xa !== xb) return xa < xb ? -1 : 1;
+  }
+  return 0;
+}
+
 async function checkVersion() {
   // jsDelivr instead of GitHub API: GitHub limits unauth requests to 60/hr
   // per IP — bad on shared mobile NATs. jsDelivr's metadata API has no such
@@ -148,21 +177,24 @@ async function checkVersion() {
       return;
     }
     const data = await response.json();
-    // jsDelivr populates tags.latest only for packages that publish formal
-    // releases. For tag-only GitHub repos it's often empty, so fall back to
-    // the first entry in versions[] (jsDelivr orders newest-first).
-    const latestTag = data?.tags?.latest || data?.versions?.[0]?.version;
-    if (!latestTag) {
+    // tags.latest follows GitHub's "Latest release" marker, which skips
+    // prereleases — while we're on an rc, it can point to an *older* stable
+    // than versions[0]. Take the max of both via semver compare so we never
+    // surface a downgrade as an update.
+    const stripV = (v) => (v ? String(v).replace(/^v/, "") : null);
+    const candidates = [stripV(data?.tags?.latest), stripV(data?.versions?.[0]?.version)].filter(Boolean);
+    if (candidates.length === 0) {
       elements.latestVersion.textContent = "שגיאה בבדיקה";
       return;
     }
-    const latest = String(latestTag).replace(/^v/, "");
+    const latest = candidates.reduce((a, b) => ((compareVersions(b, a) ?? 0) > 0 ? b : a));
 
     elements.currentVersion.textContent = VERSION;
     elements.latestVersion.textContent = latest;
     elements.latestVersionLink.href = `https://github.com/yomach/train_ticket/releases/tag/v${encodeURIComponent(latest)}`;
 
-    if (latest !== VERSION) {
+    const cmp = compareVersions(latest, VERSION);
+    if (cmp != null && cmp > 0) {
       elements.aboutBtn.classList.add("has-update");
       const dismissed = localStorage.getItem("dismissedUpdateVersion");
       elements.dismissUpdateCheckbox.checked = dismissed === latest;
@@ -171,6 +203,7 @@ async function checkVersion() {
       // Auto-popup only the first time the user sees this latest version.
       if (dismissed !== latest) showAbout(true);
     } else {
+      // Fail closed on unparseable tags (cmp == null) — no spurious popup.
       elements.dismissUpdateRow.classList.add("hidden");
     }
   } catch (error) {
