@@ -18,8 +18,8 @@ const readline = require("node:readline");
 const { spawn } = require("node:child_process");
 
 const RAIL_AGENCY_ID = "2";
-const SUPPORTED_DAYS = ["sunday", "monday", "tuesday", "wednesday", "thursday"];
-const UNSUPPORTED_DAYS = ["friday", "saturday"];
+// GTFS calendar.txt column order matches JS Date#getDay() (0=Sun..6=Sat).
+const DAY_NAMES = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"];
 const TIME_PATTERN = /^\d{1,2}:\d{2}:\d{2}$/;
 
 // The app is Jerusalem-specific (app.js:1, JERUSALEM_STATION_ID = "680") and
@@ -240,23 +240,28 @@ async function loadRailRouteIds(zipPath) {
   return set;
 }
 
-async function loadWeekdayServiceIds(zipPath) {
+async function loadServiceDays(zipPath) {
   const text = await readZipMember(zipPath, "calendar.txt");
   const { rows } = parseCsv(text);
-  const set = new Set();
+  const map = new Map(); // service_id → number[] (0=Sun..6=Sat)
   for (const row of rows) {
-    if (SUPPORTED_DAYS.some((d) => row[d] === "1")) set.add(row.service_id);
+    const days = [];
+    for (let i = 0; i < 7; i++) {
+      if (row[DAY_NAMES[i]] === "1") days.push(i);
+    }
+    if (days.length > 0) map.set(row.service_id, days);
   }
-  return set;
+  return map;
 }
 
-async function loadRailWeekdayTrips(zipPath, railRouteIds, weekdayServiceIds) {
+async function loadRailTrips(zipPath, railRouteIds, serviceDays) {
   const text = await readZipMember(zipPath, "trips.txt");
   const { rows } = parseCsv(text);
-  const trips = new Map(); // trip_id → { route_id, service_id, trainNumber }
+  const trips = new Map(); // trip_id → { route_id, service_id, trainNumber, days }
   for (const row of rows) {
     if (!railRouteIds.has(row.route_id)) continue;
-    if (!weekdayServiceIds.has(row.service_id)) continue;
+    const days = serviceDays.get(row.service_id);
+    if (!days) continue;
     trips.set(row.trip_id, {
       route_id: row.route_id,
       service_id: row.service_id,
@@ -264,6 +269,7 @@ async function loadRailWeekdayTrips(zipPath, railRouteIds, weekdayServiceIds) {
       // number (e.g. "542"), not a destination string. Verified against the
       // existing rail_times_index.json content.
       trainNumber: row.trip_headsign,
+      days,
     });
   }
   return trips;
@@ -308,14 +314,18 @@ async function streamStopTimes(zipPath, tripIds) {
 // Build the pairs structure: every (from, to) ordered pair that appears on
 // at least one trip, with the list of trains serving it.
 function buildPairs(tripStops, trips, stationMap, tripIdToTrainNumber) {
-  const pairs = {}; // "fromRailId_toRailId" → [{ trainNumber, departureTime, arrivalTime, routeId }]
-  const seenKeys = new Map(); // pairKey → Map<trainNumber, true> for dedup
+  const pairs = {}; // "fromRailId_toRailId" → [{ trainNumber, departureTime, arrivalTime, routeId, days }]
+  // Dedup key: trainNumber|departureTime|arrivalTime. Two services with the
+  // same number + times (e.g. weekday + weekend variants of the same trip)
+  // collapse to one entry with merged `days`.
+  const seenKeys = new Map(); // pairKey → Map<dedupKey, tripObject>
 
   for (const [tripId, stops] of tripStops.entries()) {
     const trip = trips.get(tripId);
     if (!trip) continue;
     const trainNumber = tripIdToTrainNumber.get(tripId);
     if (!trainNumber) continue;
+    const tripDays = trip.days || [];
     const mapped = stops
       .map((s) => ({ ...s, mapped: stationMap.get(s.stop_id) }))
       .filter((s) => s.mapped);
@@ -329,16 +339,24 @@ function buildPairs(tripStops, trips, stationMap, tripIdToTrainNumber) {
         if (!involvesJerusalem) continue;
         const key = `${from.mapped.railId}_${to.mapped.railId}`;
         if (!seenKeys.has(key)) seenKeys.set(key, new Map());
-        // Dedup: a given trainNumber should appear once per pair.
-        if (seenKeys.get(key).has(trainNumber)) continue;
-        seenKeys.get(key).set(trainNumber, true);
-        if (!pairs[key]) pairs[key] = [];
-        pairs[key].push({
+        const dedupKey = `${trainNumber}|${from.departure_time}|${to.arrival_time}`;
+        const existing = seenKeys.get(key).get(dedupKey);
+        if (existing) {
+          // Merge days from this service into the existing trip entry.
+          for (const d of tripDays) if (!existing.days.includes(d)) existing.days.push(d);
+          existing.days.sort((a, b) => a - b);
+          continue;
+        }
+        const tripObj = {
           trainNumber: String(trainNumber),
           departureTime: from.departure_time,
           arrivalTime: to.arrival_time,
           routeId: String(trip.route_id),
-        });
+          days: [...tripDays].sort((a, b) => a - b),
+        };
+        seenKeys.get(key).set(dedupKey, tripObj);
+        if (!pairs[key]) pairs[key] = [];
+        pairs[key].push(tripObj);
       }
     }
   }
@@ -368,11 +386,23 @@ function validateOutput(out, previous, allowShrink) {
       if (!t.trainNumber) issues.push(`pair ${key} trip missing trainNumber`);
       if (!TIME_PATTERN.test(String(t.departureTime))) issues.push(`pair ${key} bad departureTime ${t.departureTime}`);
       if (!TIME_PATTERN.test(String(t.arrivalTime))) issues.push(`pair ${key} bad arrivalTime ${t.arrivalTime}`);
-      if (seen.has(t.trainNumber)) issues.push(`pair ${key} duplicate trainNumber ${t.trainNumber}`);
-      seen.add(t.trainNumber);
+      // Dedup is now per (trainNumber, dep, arr) — same number can recur with
+      // different times (e.g. a service number reused for a different trip).
+      const dedupKey = `${t.trainNumber}|${t.departureTime}|${t.arrivalTime}`;
+      if (seen.has(dedupKey)) issues.push(`pair ${key} duplicate trip ${dedupKey}`);
+      seen.add(dedupKey);
       const dep = timeToSeconds(t.departureTime);
       const arr = timeToSeconds(t.arrivalTime);
       if (dep != null && arr != null && arr < dep) issues.push(`pair ${key} arrivalTime ${t.arrivalTime} before departureTime ${t.departureTime}`);
+      if (!Array.isArray(t.days) || t.days.length === 0) {
+        issues.push(`pair ${key} trip ${t.trainNumber} missing days`);
+      } else {
+        for (const d of t.days) {
+          if (!Number.isInteger(d) || d < 0 || d > 6) {
+            issues.push(`pair ${key} trip ${t.trainNumber} bad day ${d}`);
+          }
+        }
+      }
     }
   }
 
@@ -405,12 +435,12 @@ async function main() {
   console.log(`[info] rail routes: ${railRouteIds.size}`);
   if (railRouteIds.size === 0) die("no rail routes found — check agency_id");
 
-  const weekdayServiceIds = await loadWeekdayServiceIds(opts.zipPath);
-  console.log(`[info] weekday services: ${weekdayServiceIds.size}`);
+  const serviceDays = await loadServiceDays(opts.zipPath);
+  console.log(`[info] services with at least one running day: ${serviceDays.size}`);
 
-  const trips = await loadRailWeekdayTrips(opts.zipPath, railRouteIds, weekdayServiceIds);
-  console.log(`[info] rail weekday trips: ${trips.size}`);
-  if (trips.size === 0) die("no rail weekday trips found");
+  const trips = await loadRailTrips(opts.zipPath, railRouteIds, serviceDays);
+  console.log(`[info] rail trips: ${trips.size}`);
+  if (trips.size === 0) die("no rail trips found");
 
   // trip_headsign carries the train number on agency 2 (rail).
   const tripIdToTrainNumber = new Map();
@@ -454,10 +484,8 @@ async function main() {
     generatedFrom: path.basename(opts.zipPath),
     generatedAt: new Date().toISOString(),
     agencyId: RAIL_AGENCY_ID,
-    serviceMode: "weekday-only",
-    supportedDays: SUPPORTED_DAYS,
-    unsupportedDays: UNSUPPORTED_DAYS,
-    serviceCount: weekdayServiceIds.size,
+    serviceMode: "all-days",
+    serviceCount: serviceDays.size,
     stationCount: stations.length,
     pairCount: pairKeys.length,
     stations,
