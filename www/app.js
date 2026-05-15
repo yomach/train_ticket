@@ -137,33 +137,10 @@ function showAbout(visible) {
 
 // ── Version Check ────────────────────────────────────────────────────────────
 
-// Returns -1/0/+1 if a<b/a==b/a>b, or null if either side can't be parsed.
-// Accepts "[v]MAJOR.MINOR.PATCH[suffix]". At the same X.Y.Z, no-suffix beats
-// any suffix (stable > prerelease); among prereleases, natural-sort the
-// suffix so "rc2" < "rc10".
-function compareVersions(a, b) {
-  const parse = (v) => {
-    const m = String(v).replace(/^v/, "").match(/^(\d+)\.(\d+)\.(\d+)(.*)$/);
-    return m ? { major: +m[1], minor: +m[2], patch: +m[3], pre: m[4] || "" } : null;
-  };
-  const tokenize = (s) => (s.match(/\d+|\D+/g) || []).map((t) => /^\d+$/.test(t) ? +t : t);
-  const pa = parse(a), pb = parse(b);
-  if (!pa || !pb) return null;
-  for (const k of ["major", "minor", "patch"]) {
-    if (pa[k] !== pb[k]) return pa[k] < pb[k] ? -1 : 1;
-  }
-  if (!pa.pre && !pb.pre) return 0;
-  if (!pa.pre) return 1;
-  if (!pb.pre) return -1;
-  const ta = tokenize(pa.pre), tb = tokenize(pb.pre);
-  for (let i = 0; i < Math.max(ta.length, tb.length); i++) {
-    const xa = ta[i], xb = tb[i];
-    if (xa === undefined) return -1;
-    if (xb === undefined) return 1;
-    if (typeof xa !== typeof xb) return typeof xa === "number" ? -1 : 1;
-    if (xa !== xb) return xa < xb ? -1 : 1;
-  }
-  return 0;
+const { compareVersions } = window.VersionHelpers || {};
+if (!compareVersions) {
+  document.getElementById("statusText")?.replaceChildren("שגיאה בטעינת מודול העזר.");
+  throw new Error("VersionHelpers script failed to load");
 }
 
 async function checkVersion() {
