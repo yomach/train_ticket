@@ -31,6 +31,15 @@
         if (!trip.trainNumber) return false;
         if (!TIME_PATTERN.test(String(trip.departureTime))) return false;
         if (!TIME_PATTERN.test(String(trip.arrivalTime))) return false;
+        // `days` is optional for backward compat with legacy weekday-only
+        // builds (no `days` ⇒ assume Sun–Thu at runtime). When present it
+        // must be a non-empty list of valid weekday indexes.
+        if (trip.days !== undefined) {
+          if (!Array.isArray(trip.days) || trip.days.length === 0) return false;
+          for (const d of trip.days) {
+            if (!Number.isInteger(d) || d < 0 || d > 6) return false;
+          }
+        }
       }
     }
     return sawNonEmptyPair;

@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.4.0rc1] - 2026-05-15
+
+### Added
+- **Weekend schedules.** The schedule now carries per-trip day-of-week availability and includes Friday/Saturday trains. The picker only shows trains that actually run on the selected date, matching what `searchTrain` returns.
+- **Past dates are disabled.** The date input enforces `min` = today, so the picker won't let you select a date in the past.
+
+### Changed
+- **Default date & time logic.** On open (and on direction/station change) the date defaults to today and the time defaults to the next available departure. The date only auto-bumps to the next day when today has no remaining trains for the selected route. A previously-selected time is preserved as long as it hasn't passed; otherwise it snaps back to the next available train.
+- **No more weekend block.** Picking a weekend date no longer shows the "אין יכולת לעשות לסופשים" message — the schedule now answers honestly with whichever trains run that day.
+- **Build script.** `scripts/build-schedule.js` drops the Sun–Thu service filter and attaches a `days: [0..6]` array to every trip; same `(trainNumber, departure, arrival)` across multiple services collapses to one entry with merged days. `serviceMode` is now `"all-days"`.
+
 ## [0.3.0] - 2026-05-15
 
 ### Added
