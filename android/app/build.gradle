@@ -13,8 +13,8 @@ android {
         applicationId "com.yomach.trainticket"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 7
-        versionName "0.4.0rc2"
+        versionCode 8
+        versionName "0.4.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
              // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.
@@ -50,8 +50,8 @@ android {
     applicationVariants.all { variant ->
         variant.outputs.all {
             // versionName already carries "-debug" via versionNameSuffix, so
-            // release builds get e.g. train_voucher_0.4.0rc2.apk and debug builds
-            // get train_voucher_0.4.0rc2-debug.apk.
+            // release builds get e.g. train_voucher_0.4.0.apk and debug builds
+            // get train_voucher_0.4.0-debug.apk.
             outputFileName = "train_voucher_${variant.versionName}.apk"
         }
     }
