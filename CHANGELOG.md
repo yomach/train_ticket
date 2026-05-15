@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [0.4.0rc1] - 2026-05-15
+## [0.4.0rc2] - 2026-05-15
 
 ### Added
 - **Weekend schedules.** The schedule now carries per-trip day-of-week availability and includes Friday/Saturday trains. The picker only shows trains that actually run on the selected date, matching what `searchTrain` returns.
