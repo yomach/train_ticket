@@ -117,7 +117,7 @@ const elements = {
   dismissUpdateCheckbox: document.getElementById("dismissUpdateCheckbox"),
 };
 
-const VERSION = "0.3.0";
+const VERSION = "0.4.0";
 
 // ── Step navigation ──────────────────────────────────────────────────────────
 
@@ -137,6 +137,12 @@ function showAbout(visible) {
 
 // ── Version Check ────────────────────────────────────────────────────────────
 
+const { compareVersions } = window.VersionHelpers || {};
+if (!compareVersions) {
+  document.getElementById("statusText")?.replaceChildren("שגיאה בטעינת מודול העזר.");
+  throw new Error("VersionHelpers script failed to load");
+}
+
 async function checkVersion() {
   // jsDelivr instead of GitHub API: GitHub limits unauth requests to 60/hr
   // per IP — bad on shared mobile NATs. jsDelivr's metadata API has no such
@@ -148,21 +154,24 @@ async function checkVersion() {
       return;
     }
     const data = await response.json();
-    // jsDelivr populates tags.latest only for packages that publish formal
-    // releases. For tag-only GitHub repos it's often empty, so fall back to
-    // the first entry in versions[] (jsDelivr orders newest-first).
-    const latestTag = data?.tags?.latest || data?.versions?.[0]?.version;
-    if (!latestTag) {
+    // tags.latest follows GitHub's "Latest release" marker, which skips
+    // prereleases — while we're on an rc, it can point to an *older* stable
+    // than versions[0]. Take the max of both via semver compare so we never
+    // surface a downgrade as an update.
+    const stripV = (v) => (v ? String(v).replace(/^v/, "") : null);
+    const candidates = [stripV(data?.tags?.latest), stripV(data?.versions?.[0]?.version)].filter(Boolean);
+    if (candidates.length === 0) {
       elements.latestVersion.textContent = "שגיאה בבדיקה";
       return;
     }
-    const latest = String(latestTag).replace(/^v/, "");
+    const latest = candidates.reduce((a, b) => ((compareVersions(b, a) ?? 0) > 0 ? b : a));
 
     elements.currentVersion.textContent = VERSION;
     elements.latestVersion.textContent = latest;
     elements.latestVersionLink.href = `https://github.com/yomach/train_ticket/releases/tag/v${encodeURIComponent(latest)}`;
 
-    if (latest !== VERSION) {
+    const cmp = compareVersions(latest, VERSION);
+    if (cmp != null && cmp > 0) {
       elements.aboutBtn.classList.add("has-update");
       const dismissed = localStorage.getItem("dismissedUpdateVersion");
       elements.dismissUpdateCheckbox.checked = dismissed === latest;
@@ -171,6 +180,7 @@ async function checkVersion() {
       // Auto-popup only the first time the user sees this latest version.
       if (dismissed !== latest) showAbout(true);
     } else {
+      // Fail closed on unparseable tags (cmp == null) — no spurious popup.
       elements.dismissUpdateRow.classList.add("hidden");
     }
   } catch (error) {
@@ -217,21 +227,12 @@ function getLastStationForDirection(direction) {
 // ── Date helpers ─────────────────────────────────────────────────────────────
 
 function setDefaultDate() {
-  const now = new Date();
-  const day = now.getDay();
-  const offset = day === 5 ? 2 : day === 6 ? 1 : 0;
-  now.setDate(now.getDate() + offset);
-
-  const localDate = new Date(now.getTime() - now.getTimezoneOffset() * 60000)
-    .toISOString()
-    .slice(0, 10);
-  elements.tripDate.value = localDate;
-}
-
-function isSupportedWeekday(value) {
-  if (!value) return false;
-  const day = new Date(`${value}T12:00:00`).getDay();
-  return day >= 0 && day <= 4;
+  // Initial best-guess before the schedule loads. autoAdjustDate() refines
+  // this once state.pairs and a station are known — it bumps forward if
+  // there are no remaining trains today for the selected route.
+  const today = todayLocalStr();
+  elements.tripDate.min = today;
+  elements.tripDate.value = today;
 }
 
 function formatTime(value) {
@@ -287,12 +288,27 @@ function todayLocalStr() {
   return new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
 }
 
+// Legacy fallback for trips emitted by older builds that didn't carry a
+// `days` field. Those builds were weekday-only (Sun–Thu).
+const LEGACY_WEEKDAY_DAYS = [0, 1, 2, 3, 4];
+
+function tripRunsOn(trip, weekday) {
+  const days = Array.isArray(trip.days) && trip.days.length > 0 ? trip.days : LEGACY_WEEKDAY_DAYS;
+  return days.includes(weekday);
+}
+
 function getTripOptions() {
   const otherStationId = elements.otherStation.value;
   if (!otherStationId) return [];
-  const options = state.pairs[getPairKey(otherStationId)] || [];
+  const all = state.pairs[getPairKey(otherStationId)] || [];
 
-  if (elements.tripDate.value !== todayLocalStr()) return options;
+  // Day-of-week filter: only trips that actually run on the selected date.
+  const dateStr = elements.tripDate.value;
+  if (!dateStr) return [];
+  const weekday = new Date(`${dateStr}T12:00:00`).getDay();
+  const options = all.filter((option) => tripRunsOn(option, weekday));
+
+  if (dateStr !== todayLocalStr()) return options;
 
   const now = new Date();
   const nowMinutes = now.getHours() * 60 + now.getMinutes();
@@ -300,6 +316,31 @@ function getTripOptions() {
     const [h, m] = formatTime(option.departureTime).split(":").map(Number);
     return h * 60 + m >= nowMinutes;
   });
+}
+
+function hasFutureTrainsToday() {
+  const otherStationId = elements.otherStation.value;
+  if (!otherStationId) return false;
+  const all = state.pairs[getPairKey(otherStationId)] || [];
+  const now = new Date();
+  const weekday = now.getDay();
+  const nowMinutes = now.getHours() * 60 + now.getMinutes();
+  return all.some((option) => {
+    if (!tripRunsOn(option, weekday)) return false;
+    const [h, m] = formatTime(option.departureTime).split(":").map(Number);
+    return h * 60 + m >= nowMinutes;
+  });
+}
+
+function autoAdjustDate() {
+  // Only touch the auto-default — never override a user-picked date.
+  if (elements.tripDate.value !== todayLocalStr()) return;
+  if (hasFutureTrainsToday()) return;
+  const next = new Date();
+  next.setDate(next.getDate() + 1);
+  elements.tripDate.value = new Date(next.getTime() - next.getTimezoneOffset() * 60000)
+    .toISOString()
+    .slice(0, 10);
 }
 
 function renderTimeOptions() {
@@ -324,13 +365,6 @@ function renderTimeOptions() {
 }
 
 function updateStatus() {
-  if (!isSupportedWeekday(elements.tripDate.value)) {
-    elements.tripTime.innerHTML = '<option value="">אין יכולת לעשות לסופשים</option>';
-    elements.trainNumber.value = "";
-    elements.statusText.textContent = "אין יכולת לעשות לסופשים.";
-    return;
-  }
-
   renderTimeOptions();
 
   const options = getTripOptions();
@@ -488,11 +522,6 @@ function redirectToOfficialBooking(params, statusElement) {
 
 async function handleSubmit(event) {
   event.preventDefault();
-
-  if (!isSupportedWeekday(elements.tripDate.value)) {
-    elements.statusText.textContent = "אין יכולת לבצע הזמנה לסופשים. נא לבחור יום ראשון עד חמישי.";
-    return;
-  }
 
   const otherStationId = elements.otherStation.value;
   if (!otherStationId || !elements.tripTime.value) {
@@ -734,6 +763,7 @@ function handleDirectionClick(event) {
   });
 
   renderStationOptions();
+  autoAdjustDate();
   updateStatus();
 }
 
@@ -746,6 +776,7 @@ function applySchedule(data) {
   state.pairs = data.pairs || {};
   state.meta = data;
   renderStationOptions();
+  autoAdjustDate();
   updateStatus();
 }
 
@@ -822,6 +853,7 @@ function registerEvents() {
     if (elements.otherStation.value) {
       setLastStationForDirection(state.direction, elements.otherStation.value);
     }
+    autoAdjustDate();
     updateStatus();
   });
   elements.tripDate.addEventListener("change", updateStatus);
