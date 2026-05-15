@@ -13,6 +13,9 @@ All notable changes to this project will be documented in this file.
 - **No more weekend block.** Picking a weekend date no longer shows the "אין יכולת לעשות לסופשים" message — the schedule now answers honestly with whichever trains run that day.
 - **Build script.** `scripts/build-schedule.js` drops the Sun–Thu service filter and attaches a `days: [0..6]` array to every trip; same `(trainNumber, departure, arrival)` across multiple services collapses to one entry with merged days. `serviceMode` is now `"all-days"`.
 
+### Fixed
+- **Update popup no longer fires when the remote version is older.** The version check now does a real semver compare (major/minor/patch + natural-sorted prerelease suffix) instead of plain string inequality, so a prerelease build no longer gets nagged to "upgrade" to an older stable release.
+
 ## [0.3.0] - 2026-05-15
 
 ### Added
