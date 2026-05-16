@@ -196,8 +196,10 @@ const STOP_CODE_TO_RAIL_ID = {
   "17120": 6900,   // מזכרת בתיה
   "17121": 2940,   // רעננה - מערב
   "17122": 2960,   // רעננה - דרום
+  "17114": 3310,   // נתניה קריית ספיר
+  "17123": 1220,   // מרכזית המפרץ
   // Not in current app schedule (jerusalem light rail / new opening, etc.):
-  //   17076 (ירושלים גן חיות), 17078 (ירושלים מלחה), 17114 (נתניה קריית ספיר)
+  //   17076 (ירושלים גן חיות), 17078 (ירושלים מלחה)
 };
 
 function buildStationIdMap(referenceJsonPath, gtfsStops) {
