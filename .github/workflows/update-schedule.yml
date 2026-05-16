@@ -29,7 +29,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: "22"
 
       # No deps to install — the build script is pure Node + shells out to
       # unzip. Skip npm ci unless we add deps that the script needs.
@@ -49,20 +49,20 @@ jobs:
         id: changes
         run: |
           set -euo pipefail
-          # Ignore generatedAt (and generatedFrom in case the upstream filename
-          # changes) so a no-op nightly doesn't churn the repo.
+          # Ignore generatedAt, generatedFrom, and serviceCount so no-op nightlies
+          # don't churn the repo.
           if git diff --quiet -- www/rail_times_index.json; then
             echo "changed=false" >> "$GITHUB_OUTPUT"
             echo "No changes."
             exit 0
           fi
           diff_payload="$(
-            diff <(jq 'del(.generatedAt,.generatedFrom)' <(git show HEAD:www/rail_times_index.json)) \
-                 <(jq 'del(.generatedAt,.generatedFrom)' www/rail_times_index.json) || true
+            diff <(jq 'del(.generatedAt,.generatedFrom,.serviceCount)' <(git show HEAD:www/rail_times_index.json)) \
+                 <(jq 'del(.generatedAt,.generatedFrom,.serviceCount)' www/rail_times_index.json) || true
           )"
           if [ -z "$diff_payload" ]; then
             echo "changed=false" >> "$GITHUB_OUTPUT"
-            echo "Only generatedAt changed; skipping PR."
+            echo "Only metadata changed; skipping PR."
             git checkout -- www/rail_times_index.json
             exit 0
           fi
@@ -113,9 +113,11 @@ jobs:
             echo "EOF"
           } >> "$GITHUB_OUTPUT"
 
+      # NOTE: This step requires "Allow GitHub Actions to create and approve pull requests"
+      # to be enabled in Settings -> Actions -> General -> Workflow permissions.
       - name: Open PR
         if: steps.changes.outputs.changed == 'true' && github.event_name != 'pull_request'
-        uses: peter-evans/create-pull-request@v6
+        uses: peter-evans/create-pull-request@v8.1.1
         with:
           branch: chore/refresh-rail-schedule
           base: main

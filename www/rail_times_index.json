@@ -1,10 +1,10 @@
 {
   "generatedFrom": "gtfs.zip",
-  "generatedAt": "2026-05-15T11:34:20.786Z",
+  "generatedAt": "2026-05-16T17:27:12.676Z",
   "agencyId": "2",
   "serviceMode": "all-days",
-  "serviceCount": 52004,
-  "stationCount": 65,
+  "serviceCount": 52109,
+  "stationCount": 66,
   "pairCount": 16,
   "stations": [
     {
@@ -170,6 +170,10 @@
     {
       "stationId": 3300,
       "stationName": "נתניה"
+    },
+    {
+      "stationId": 3310,
+      "stationName": "נתניה קריית ספיר"
     },
     {
       "stationId": 1500,

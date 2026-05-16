@@ -28,7 +28,7 @@ toStation, time, trainNumber)` tuples; the FE uses it to build dropdowns
 without hitting the API for trip discovery. It's rebuilt daily by the
 `Update rail schedule` GitHub Action (`scripts/build-schedule.js` + the
 MOT GTFS feed) — the workflow opens a PR when content actually changes,
-ignoring `generatedAt`. The browser also fetches the latest JSON from
+ignoring `generatedAt`, `generatedFrom`, and `serviceCount`. The browser also fetches the latest JSON from
 jsDelivr in the background after first paint and applies it if newer
 and valid (only while the user is still on the form step, so the UI
 never gets yanked out from under a booking).
@@ -69,7 +69,7 @@ npx --yes wrangler@latest dev --port 8787 --local
 # 2. Static FE (in another terminal). The FE moved into www/ when we
 #    added the Capacitor Android wrapper — Capacitor uses www/ as the
 #    WebView root. Serve from there in the browser too.
-cd /home/yomach/codex/train_ticket/www
+cd www
 python3 -m http.server 8000
 
 # 3. Open http://localhost:8000 in a browser, then in DevTools console:

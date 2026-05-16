@@ -26,6 +26,7 @@
   2. Capture `Otp/Send`, `Otp/Verify`, `OrderSeatForTrip` as cURL.
   3. Compare headers and bodies with `cloudflare-worker/worker.js` and `www/app.js`.
 - **Constraint:** Do NOT scrape `rail.co.il` home page; it is protected by Cloudflare JS challenges.
+- **Station Mappings:** GTFS `stop_code` to `rail.co.il` ID mapping is hardcoded in `scripts/build-schedule.js` (`STOP_CODE_TO_RAIL_ID`). Update this table when the build script logs "unmapped GTFS rail stop" warnings for real new stations.
 
 ## Code Conventions
 - **Station IDs:** Always strings (e.g., `"680"`). Do NOT cast to Number.
