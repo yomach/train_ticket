@@ -52,6 +52,10 @@ jobs:
         if: steps.tag_check.outputs.exists == 'false'
         run: npm ci
 
+      - name: Sync version into www/app.js
+        if: steps.tag_check.outputs.exists == 'false'
+        run: npm run sync-version
+
       - name: Build web assets
         if: steps.tag_check.outputs.exists == 'false'
         run: |

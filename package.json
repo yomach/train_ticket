@@ -7,7 +7,8 @@
     "cap:sync": "cap sync android",
     "cap:open": "cap open android",
     "android:debug": "cd android && ./gradlew assembleDebug",
-    "build-schedule": "node scripts/build-schedule.js"
+    "build-schedule": "node scripts/build-schedule.js",
+    "sync-version": "node scripts/sync-version.js"
   },
   "dependencies": {
     "@capacitor/android": "^6.1.0",
