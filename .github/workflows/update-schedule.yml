@@ -125,13 +125,6 @@ jobs:
           npm version patch --no-git-tag-version
           NEW_VER=$(node -p "require('./package.json').version")
           echo "NEW_VERSION=$NEW_VER" >> "$GITHUB_ENV"
-          
-          # Sync Android version
-          # Increment versionCode and set versionName to NEW_VER
-          PREV_CODE=$(grep -oP 'versionCode \K[0-9]+' android/app/build.gradle)
-          NEW_CODE=$((PREV_CODE + 1))
-          sed -i "s/versionCode $PREV_CODE/versionCode $NEW_CODE/" android/app/build.gradle
-          sed -i "s/versionName \".*\"/versionName \"$NEW_VER\"/" android/app/build.gradle
 
           # Update CHANGELOG.md
           # Insert a new release block under ## [Unreleased]
@@ -153,6 +146,7 @@ jobs:
           delete-branch: true
           add-paths: |
             www/rail_times_index.json
+            www/app.js
             package.json
             package-lock.json
             CHANGELOG.md

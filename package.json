@@ -1,13 +1,14 @@
 {
   "name": "train_ticket",
-  "version": "0.4.1",
+  "version": "0.4.2",
   "private": true,
   "scripts": {
     "test": "node --test",
     "cap:sync": "cap sync android",
     "cap:open": "cap open android",
     "android:debug": "cd android && ./gradlew assembleDebug",
-    "build-schedule": "node scripts/build-schedule.js"
+    "build-schedule": "node scripts/build-schedule.js",
+    "version": "node scripts/sync-version.js"
   },
   "dependencies": {
     "@capacitor/android": "^6.1.0",
