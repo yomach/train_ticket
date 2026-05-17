@@ -113,6 +113,32 @@ jobs:
             echo "EOF"
           } >> "$GITHUB_OUTPUT"
 
+      - name: Bump version and update changelog
+        if: steps.changes.outputs.changed == 'true' && github.event_name != 'pull_request'
+        run: |
+          set -euo pipefail
+          # Configure git so npm version can run (though we use --no-git-tag-version)
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          
+          # Bump patch version
+          npm version patch --no-git-tag-version
+          NEW_VER=$(node -p "require('./package.json').version")
+          echo "NEW_VERSION=$NEW_VER" >> "$GITHUB_ENV"
+          
+          # Sync Android version
+          # Increment versionCode and set versionName to NEW_VER
+          PREV_CODE=$(grep -oP 'versionCode \K[0-9]+' android/app/build.gradle)
+          NEW_CODE=$((PREV_CODE + 1))
+          sed -i "s/versionCode $PREV_CODE/versionCode $NEW_CODE/" android/app/build.gradle
+          sed -i "s/versionName \".*\"/versionName \"$NEW_VER\"/" android/app/build.gradle
+
+          # Update CHANGELOG.md
+          # Insert a new release block under ## [Unreleased]
+          TODAY=$(date +%Y-%m-%d)
+          CH_BLOCK="## [$NEW_VER] - $TODAY\n\n### Changed\n- **Schedule Refresh.** Updated train schedule.\n"
+          sed -i "/## \[Unreleased\]/a \\\n$CH_BLOCK" CHANGELOG.md
+
       # NOTE: This step requires "Allow GitHub Actions to create and approve pull requests"
       # to be enabled in Settings -> Actions -> General -> Workflow permissions.
       - name: Open PR
@@ -121,8 +147,13 @@ jobs:
         with:
           branch: chore/refresh-rail-schedule
           base: main
-          commit-message: "chore: refresh rail schedule"
-          title: "chore: refresh rail schedule"
+          commit-message: "chore: refresh rail schedule to v${{ env.NEW_VERSION }}"
+          title: "chore: refresh rail schedule to v${{ env.NEW_VERSION }}"
           body: ${{ steps.prbody.outputs.body }}
           delete-branch: true
-          add-paths: www/rail_times_index.json
+          add-paths: |
+            www/rail_times_index.json
+            package.json
+            package-lock.json
+            CHANGELOG.md
+            android/app/build.gradle

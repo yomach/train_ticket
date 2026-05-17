@@ -363,9 +363,15 @@ function buildPairs(tripStops, trips, stationMap, tripIdToTrainNumber) {
     }
   }
 
-  // Sort each pair by departureTime ascending.
+  // Sort each pair by departureTime, then arrivalTime, then trainNumber for determinism.
   for (const key of Object.keys(pairs)) {
-    pairs[key].sort((a, b) => a.departureTime.localeCompare(b.departureTime));
+    pairs[key].sort((a, b) => {
+      const depComp = a.departureTime.localeCompare(b.departureTime);
+      if (depComp !== 0) return depComp;
+      const arrComp = a.arrivalTime.localeCompare(b.arrivalTime);
+      if (arrComp !== 0) return arrComp;
+      return a.trainNumber.localeCompare(b.trainNumber);
+    });
   }
   return pairs;
 }
@@ -482,6 +488,12 @@ async function main() {
     .map(([id, name]) => ({ stationId: id, stationName: name }))
     .sort((a, b) => a.stationName.localeCompare(b.stationName, "he"));
 
+  // Re-build pairs object with sorted keys to ensure stable JSON output.
+  const sortedPairs = {};
+  for (const key of Object.keys(pairs).sort()) {
+    sortedPairs[key] = pairs[key];
+  }
+
   const out = {
     generatedFrom: path.basename(opts.zipPath),
     generatedAt: new Date().toISOString(),
@@ -491,7 +503,7 @@ async function main() {
     stationCount: stations.length,
     pairCount: pairKeys.length,
     stations,
-    pairs,
+    pairs: sortedPairs,
   };
 
   let previous = null;
