@@ -8,9 +8,6 @@ All notable changes to this project will be documented in this file.
 
 ### Changed
 - **Schedule Refresh.** Updated train schedule.
-
-
-### Changed
 - **CI Workflow.** Upgraded the `Update rail schedule` workflow to use Node.js 22 and the latest `peter-evans/create-pull-request@v8`. The workflow now ignores fluctuations in `serviceCount` when detecting changes, reducing unnecessary PRs.
 - **Maintenance.** Updated `scripts/build-schedule.js` to include mappings for **Netanya Sapir** and additional **Merkazit HaMifratz** stop codes, resolving build warnings.
 
