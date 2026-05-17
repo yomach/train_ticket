@@ -70,6 +70,7 @@ jobs:
         if: steps.tag_check.outputs.exists == 'false'
         run: |
           echo "${{ secrets.RELEASE_KEYSTORE_BASE64 }}" | base64 --decode > android/app/release.keystore
+          md5sum android/app/release.keystore
           echo "storeFile=release.keystore" > android/keystore.properties
           echo "storePassword=${{ secrets.RELEASE_KEYSTORE_PASSWORD }}" >> android/keystore.properties
           echo "keyAlias=${{ secrets.RELEASE_KEY_ALIAS }}" >> android/keystore.properties
