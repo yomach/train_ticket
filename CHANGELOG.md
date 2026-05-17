@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.4.2] - 2026-05-17
+
+### Fixed
+- **Version Display.** Fixed a bug where the "About" page reported an outdated version number (0.4.0 instead of 0.4.1).
+
+### Changed
+- **Release Automation.** Centralized version management to ensure all platforms (Web and Android) stay in sync automatically on every release.
+
 ## [0.4.1] - 2026-05-17
 
 ### Changed
