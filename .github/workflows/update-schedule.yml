@@ -133,6 +133,9 @@ jobs:
           sed -i "s/versionCode $PREV_CODE/versionCode $NEW_CODE/" android/app/build.gradle
           sed -i "s/versionName \".*\"/versionName \"$NEW_VER\"/" android/app/build.gradle
 
+          # Sync VERSION constant in www/app.js
+          npm run sync-version
+
           # Update CHANGELOG.md
           # Insert a new release block under ## [Unreleased]
           TODAY=$(date +%Y-%m-%d)
@@ -153,6 +156,7 @@ jobs:
           delete-branch: true
           add-paths: |
             www/rail_times_index.json
+            www/app.js
             package.json
             package-lock.json
             CHANGELOG.md
