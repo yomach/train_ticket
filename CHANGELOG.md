@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.4.4] - 2026-05-22
+
+### Changed
+- **Schedule Refresh.** Updated train schedule.
+
+
 ## [0.4.3] - 2026-05-21
 
 ### Changed
