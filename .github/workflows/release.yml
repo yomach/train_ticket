@@ -88,6 +88,7 @@ jobs:
         with:
           tag_name: "v${{ steps.version.outputs.version }}"
           files: android/app/build/outputs/apk/release/train_voucher_${{ steps.version.outputs.version }}.apk
+          fail_on_unmatched_files: true
           generate_release_notes: true
           draft: false
           prerelease: false

@@ -16,6 +16,7 @@
 - **Test:** `npm test` (Node.js test runner)
 
 ### Release Flow
+- **Version Bump:** ALWAYS use `npm version <patch|minor|major>` to bump the version. DO NOT manually edit `package.json`. The `npm version` command automatically runs `scripts/sync-version.js` to ensure `www/app.js` and `android/app/build.gradle` are synced and committed.
 - **Fully Automated:** When a PR containing a version bump in `package.json` is merged to `main`, the `Release` GitHub Action automatically creates the `vX.Y.Z` git tag.
 - **APK Generation:** That same Action builds the Android APK and publishes a formal GitHub Release automatically. No manual tagging or `gh release` commands are needed.
 
