@@ -829,26 +829,32 @@ function formatScheduleDate(isoStr) {
   if (!isoStr) return null;
   try {
     return new Date(isoStr).toLocaleDateString("he-IL", {
-      day: "2-digit", month: "2-digit", year: "numeric",
-      hour: "2-digit", minute: "2-digit",
+      day: "2-digit", month: "2-digit", year: "numeric"
     });
   } catch {
     return isoStr;
   }
 }
 
+function formatScheduleVersion(version, isoStr) {
+  const dateStr = formatScheduleDate(isoStr);
+  if (!version && !dateStr) return "טוען...";
+  if (!version) return dateStr;
+  if (!dateStr) return `v${version}`;
+  return `v${version} (${dateStr})`;
+}
+
 /** Update the schedule details modal with current metadata. */
 function updateScheduleInfo() {
   if (!state.meta) return;
-  const formatted = formatScheduleDate(state.meta.generatedAt);
-  if (formatted) elements.scheduleDate.textContent = formatted;
-
-  const bundledFormatted = formatScheduleDate(state.bundledGeneratedAt);
-  if (bundledFormatted) elements.scheduleBundledDate.textContent = bundledFormatted;
+  elements.scheduleDate.textContent = formatScheduleVersion(state.meta.version, state.meta.generatedAt);
+  elements.scheduleBundledDate.textContent = formatScheduleVersion(state.bundledVersion || VERSION, state.bundledGeneratedAt);
 
   elements.scheduleSource.textContent =
     SCHEDULE_SOURCE_LABELS[state.scheduleSource] || "—";
 }
+
+let scheduleStatusTimeout = null;
 
 /** Show a transient status message in the schedule details modal. */
 function showScheduleStatus(text, cssClass) {
@@ -856,6 +862,14 @@ function showScheduleStatus(text, cssClass) {
   elements.scheduleStatus.className = cssClass || "";
   elements.scheduleStatusRow.style.visibility = "visible";
   elements.scheduleStatusRow.style.opacity = "1";
+}
+
+function hideScheduleStatusAfterDelay() {
+  if (scheduleStatusTimeout) clearTimeout(scheduleStatusTimeout);
+  scheduleStatusTimeout = setTimeout(() => {
+    elements.scheduleStatusRow.style.visibility = "hidden";
+    elements.scheduleStatusRow.style.opacity = "0";
+  }, 3000);
 }
 
 function readScheduleCache() {
@@ -912,7 +926,10 @@ async function refreshScheduleInBackground(allowNetwork = true) {
     }
 
     // 2b. ETag changed or missing — fetch full payload.
-    const res = await fetch(REMOTE_SCHEDULE_URL, { signal: AbortSignal.timeout(10_000) });
+    const res = await fetch(REMOTE_SCHEDULE_URL, { 
+      cache: "no-cache",
+      signal: AbortSignal.timeout(10_000) 
+    });
     if (!res.ok) return "error";
     remote = await res.json();
     newEtag = newEtag || res.headers.get("etag");
@@ -1017,10 +1034,7 @@ function registerEvents() {
       showScheduleStatus("✗ העדכון נכשל", "error");
     }
     elements.refreshScheduleBtn.disabled = false;
-    setTimeout(() => {
-      elements.scheduleStatusRow.style.visibility = "hidden";
-      elements.scheduleStatusRow.style.opacity = "0";
-    }, 3000);
+    hideScheduleStatusAfterDelay();
   });
 
   elements.resetScheduleBtn.addEventListener("click", async () => {
@@ -1035,15 +1049,13 @@ function registerEvents() {
       const data = await response.json();
       if (!isValidScheduleShape(data)) throw new Error("bundled data failed validation");
       state.bundledGeneratedAt = data.generatedAt || null;
+      state.bundledVersion = data.version || null;
       applySchedule(data, "bundled");
       showScheduleStatus("✓ הלוח אופס למובנה", "success");
     } catch {
       showScheduleStatus("✗ האיפוס נכשל", "error");
     }
-    setTimeout(() => {
-      elements.scheduleStatusRow.style.visibility = "hidden";
-      elements.scheduleStatusRow.style.opacity = "0";
-    }, 3000);
+    hideScheduleStatusAfterDelay();
   });
 
   elements.autoUpdateSchedule.addEventListener("change", () => {

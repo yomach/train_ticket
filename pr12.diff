@@ -1,0 +1,626 @@
+diff --git a/CHANGELOG.md b/CHANGELOG.md
+index df6f478..875ffac 100644
+--- a/CHANGELOG.md
++++ b/CHANGELOG.md
+@@ -4,18 +4,27 @@ All notable changes to this project will be documented in this file.
+ 
+ ## [Unreleased]
+ 
++## [0.5.0] - 2026-05-23
++
++### Added
++- **Schedule Info Modal.** Added a new power-user panel accessible from the "About" dialog ("פרטי לוח זמנים ›"). It displays the currently active schedule date vs. the bundled date, and provides manual "Refresh" and "Reset" controls.
++- **Auto-Update Toggle.** Added a checkbox in the schedule panel to opt out of background schedule updates.
++
++### Changed
++- **Smarter Update Prompts.** The app will no longer pop up the "New Version" dialog for patch-only updates (e.g., automated schedule refreshes). The red dot will still appear, but the intrusive popup is reserved for minor/major feature updates.
++- **Optimized Network Fetch.** Background schedule refreshes now perform a lightweight `HEAD` request to check the jsDelivr CDN's `ETag` before downloading. This avoids pulling down the 3MB JSON file if the data hasn't actually changed.
++- **Offline Reliability.** Forced `cache: "no-cache"` on manual schedule refreshes to prevent the browser from spoofing a successful refresh from its offline cache when there's no internet connection.
++
+ ## [0.4.4] - 2026-05-22
+ 
+ ### Changed
+ - **Schedule Refresh.** Updated train schedule.
+ 
+-
+ ## [0.4.3] - 2026-05-21
+ 
+ ### Changed
+ - **Schedule Refresh.** Updated train schedule.
+ 
+-
+ ## [0.4.2] - 2026-05-17
+ 
+ ### Fixed
+diff --git a/GEMINI.md b/GEMINI.md
+index 02fa5b5..491697c 100644
+--- a/GEMINI.md
++++ b/GEMINI.md
+@@ -16,8 +16,8 @@
+ - **Test:** `npm test` (Node.js test runner)
+ 
+ ### Release Flow
+-- **Tagging:** `git tag -a vX.Y.Z -m "Release version X.Y.Z" && git push origin vX.Y.Z`
+-- **Create Release:** Use `gh release create vX.Y.Z ...` to publish the APK.
++- **Fully Automated:** When a PR containing a version bump in `package.json` is merged to `main`, the `Release` GitHub Action automatically creates the `vX.Y.Z` git tag.
++- **APK Generation:** That same Action builds the Android APK and publishes a formal GitHub Release automatically. No manual tagging or `gh release` commands are needed.
+ 
+ ## Maintenance & Debugging
+ - **API Breakers:** rail.co.il rotates `Ocp-Apim-Subscription-Key` and endpoint schemas.
+@@ -34,3 +34,6 @@
+ - **Languages:** Use literal string `"Hebrew"`.
+ - **Cookies:** Hand-rolled helpers in `app.js` (1-year expiry, `path=/`).
+ - **Sync:** Always update both `cloudflare-worker/worker.js` and `www/app.js` (native branch) when API headers or schemas change.
++
++## AI Agent Rules
++1. **Always Sync First:** Before starting any coding task, run `git fetch` and check if the local branch is behind `origin/main`. If the repository is out of sync (e.g. because the bot auto-merged a schedule update), you MUST prompt the user to commit or stash their work and pull the latest `main` before proceeding.
+diff --git a/LOCAL_DEV.md b/LOCAL_DEV.md
+index ea5783e..f379220 100644
+--- a/LOCAL_DEV.md
++++ b/LOCAL_DEV.md
+@@ -31,7 +31,10 @@ MOT GTFS feed) — the workflow opens a PR when content actually changes,
+ ignoring `generatedAt`, `generatedFrom`, and `serviceCount`. The browser also fetches the latest JSON from
+ jsDelivr in the background after first paint and applies it if newer
+ and valid (only while the user is still on the form step, so the UI
+-never gets yanked out from under a booking).
++never gets yanked out from under a booking). This background fetch is
++optimized with an HTTP `HEAD` request to check the CDN's `ETag` before
++downloading the heavy JSON payload, and can be disabled by the user via
++the "Schedule Info" panel.
+ 
+ After successful booking, the FE pre-fetches platform numbers via the
+ `searchTrain` endpoint (`POST /rjpa/api/v1/timetable/searchTrain`, JSON
+@@ -186,6 +189,7 @@ The general rule: anything that only exists to make `wrangler dev`
+ | `www/app.js` | All FE logic: form state, OTP flow, cookies, `apiPost`, native vs browser branch, `searchTrain` pre-fetch, background schedule refresh |
+ | `www/booking-helpers.js` | URL builder + redirect-fallback heuristic, exposed for tests |
+ | `www/schedule-helpers.js` | Pure validators / extractors (`isValidScheduleShape`, `sanitizePlatform`, `extractPlatforms`, `tripKey`) — shared by app + Node tests |
++| `www/version-helpers.js` | Semver comparators (`compareVersions`, `isSignificantUpdate`) used to conditionally show update popups. |
+ | `www/index.html` | Three steps: form → OTP → result (result includes trip summary + platform line) |
+ | `www/rail_times_index.json` | GTFS index of valid trips. Rebuilt daily by CI |
+ | `www/vendor/qrcode.min.js` | Vendored qrcodejs (was a CDN script) |
+diff --git a/package.json b/package.json
+index 9943678..748974e 100644
+--- a/package.json
++++ b/package.json
+@@ -1,6 +1,6 @@
+ {
+   "name": "train_ticket",
+-  "version": "0.4.4",
++  "version": "0.5.0",
+   "private": true,
+   "scripts": {
+     "test": "node --test",
+diff --git a/tests/version-helpers.test.js b/tests/version-helpers.test.js
+index 6bdfeff..a590eff 100644
+--- a/tests/version-helpers.test.js
++++ b/tests/version-helpers.test.js
+@@ -1,7 +1,7 @@
+ const test = require("node:test");
+ const assert = require("node:assert/strict");
+ 
+-const { compareVersions } = require("../www/version-helpers.js");
++const { compareVersions, isSignificantUpdate } = require("../www/version-helpers.js");
+ 
+ const sign = (n) => (n == null ? null : n === 0 ? 0 : n < 0 ? -1 : 1);
+ 
+@@ -53,3 +53,41 @@ test("regression: 0.4.0rc1 should not flag 0.3.0 as newer", () => {
+   // The exact bug the helper was added to fix.
+   assert.equal(sign(compareVersions("0.3.0", "0.4.0rc1")), -1);
+ });
++
++// ── isSignificantUpdate ──────────────────────────────────────────────────────
++
++test("isSignificantUpdate: patch-only bump is NOT significant", () => {
++  assert.equal(isSignificantUpdate("0.4.2", "0.4.3"), false);
++  assert.equal(isSignificantUpdate("0.4.0", "0.4.99"), false);
++});
++
++test("isSignificantUpdate: minor bump IS significant", () => {
++  assert.equal(isSignificantUpdate("0.4.2", "0.5.0"), true);
++  assert.equal(isSignificantUpdate("0.4.2", "0.5.1"), true);
++});
++
++test("isSignificantUpdate: major bump IS significant", () => {
++  assert.equal(isSignificantUpdate("0.4.2", "1.0.0"), true);
++  assert.equal(isSignificantUpdate("0.4.2", "2.0.0"), true);
++});
++
++test("isSignificantUpdate: same version is NOT significant", () => {
++  assert.equal(isSignificantUpdate("0.4.2", "0.4.2"), false);
++});
++
++test("isSignificantUpdate: handles v-prefix", () => {
++  assert.equal(isSignificantUpdate("v0.4.2", "v0.5.0"), true);
++  assert.equal(isSignificantUpdate("v0.4.2", "v0.4.3"), false);
++});
++
++test("isSignificantUpdate: unparseable returns false", () => {
++  assert.equal(isSignificantUpdate("weird", "0.5.0"), false);
++  assert.equal(isSignificantUpdate("0.4.0", "weird"), false);
++  assert.equal(isSignificantUpdate(null, "0.5.0"), false);
++  assert.equal(isSignificantUpdate(undefined, "0.5.0"), false);
++});
++
++test("isSignificantUpdate: downgrade is NOT significant", () => {
++  assert.equal(isSignificantUpdate("0.5.0", "0.4.0"), false);
++  assert.equal(isSignificantUpdate("1.0.0", "0.9.0"), false);
++});
+diff --git a/www/app.js b/www/app.js
+index 39c8f7a..6b132d0 100644
+--- a/www/app.js
++++ b/www/app.js
+@@ -69,6 +69,10 @@ const state = {
+   // Platform info pre-fetched at submit; consumed at showResult.
+   platformInfoPromise: null,
+   platformInfoTripKey: "",
++  // Source of the active schedule data: "bundled" | "cache" | "remote"
++  scheduleSource: null,
++  // generatedAt from the bundled rail_times_index.json (persists across refreshes)
++  bundledGeneratedAt: null,
+ };
+ 
+ if (!window.ScheduleHelpers) {
+@@ -115,9 +119,21 @@ const elements = {
+   latestVersionLink: document.getElementById("latestVersionLink"),
+   dismissUpdateRow: document.getElementById("dismissUpdateRow"),
+   dismissUpdateCheckbox: document.getElementById("dismissUpdateCheckbox"),
++  // schedule details
++  openScheduleInfo: document.getElementById("openScheduleInfo"),
++  scheduleModal: document.getElementById("scheduleModal"),
++  closeScheduleBtn: document.getElementById("closeScheduleBtn"),
++  scheduleDate: document.getElementById("scheduleDate"),
++  scheduleBundledDate: document.getElementById("scheduleBundledDate"),
++  scheduleSource: document.getElementById("scheduleSource"),
++  scheduleStatusRow: document.getElementById("scheduleStatusRow"),
++  scheduleStatus: document.getElementById("scheduleStatus"),
++  refreshScheduleBtn: document.getElementById("refreshScheduleBtn"),
++  resetScheduleBtn: document.getElementById("resetScheduleBtn"),
++  autoUpdateSchedule: document.getElementById("autoUpdateSchedule"),
+ };
+ 
+-const VERSION = "0.4.4";
++const VERSION = "0.5.0";
+ 
+ // ── Step navigation ──────────────────────────────────────────────────────────
+ 
+@@ -137,7 +153,7 @@ function showAbout(visible) {
+ 
+ // ── Version Check ────────────────────────────────────────────────────────────
+ 
+-const { compareVersions } = window.VersionHelpers || {};
++const { compareVersions, isSignificantUpdate } = window.VersionHelpers || {};
+ if (!compareVersions) {
+   document.getElementById("statusText")?.replaceChildren("שגיאה בטעינת מודול העזר.");
+   throw new Error("VersionHelpers script failed to load");
+@@ -172,13 +188,20 @@ async function checkVersion() {
+ 
+     const cmp = compareVersions(latest, VERSION);
+     if (cmp != null && cmp > 0) {
+-      elements.aboutBtn.classList.add("has-update");
+-      const dismissed = localStorage.getItem("dismissedUpdateVersion");
+-      elements.dismissUpdateCheckbox.checked = dismissed === latest;
+-      elements.dismissUpdateRow.dataset.version = latest;
+-      elements.dismissUpdateRow.classList.remove("hidden");
+-      // Auto-popup only the first time the user sees this latest version.
+-      if (dismissed !== latest) showAbout(true);
++      // Only badge + auto-popup for minor/major bumps. Patch-only bumps
++      // (schedule refreshes) are visible in About but never intrusive.
++      const significant = isSignificantUpdate(VERSION, latest);
++      if (significant) {
++        elements.aboutBtn.classList.add("has-update");
++        const dismissed = localStorage.getItem("dismissedUpdateVersion");
++        elements.dismissUpdateCheckbox.checked = dismissed === latest;
++        elements.dismissUpdateRow.dataset.version = latest;
++        elements.dismissUpdateRow.classList.remove("hidden");
++        // Auto-popup only the first time the user sees this latest version.
++        if (dismissed !== latest) showAbout(true);
++      } else {
++        elements.dismissUpdateRow.classList.add("hidden");
++      }
+     } else {
+       // Fail closed on unparseable tags (cmp == null) — no spurious popup.
+       elements.dismissUpdateRow.classList.add("hidden");
+@@ -770,14 +793,69 @@ function handleDirectionClick(event) {
+ // ── Data loading ─────────────────────────────────────────────────────────────
+ 
+ const SCHEDULE_CACHE_KEY = "scheduleCache";
++const SCHEDULE_ETAG_KEY = "scheduleEtag";
++const AUTO_UPDATE_KEY = "autoUpdateSchedule";
++
++// Initialize auto-update checkbox from localStorage (default: enabled).
++(function initAutoUpdate() {
++  const stored = localStorage.getItem(AUTO_UPDATE_KEY);
++  // null (never set) = default on; "0" = user disabled
++  elements.autoUpdateSchedule.checked = stored !== "0";
++})();
++
++function isAutoUpdateEnabled() {
++  return elements.autoUpdateSchedule.checked;
++}
++
++const SCHEDULE_SOURCE_LABELS = {
++  bundled: "גרסה מובנית",
++  cache: "מטמון מקומי",
++  remote: "עדכון רקע",
++};
+ 
+-function applySchedule(data) {
++function applySchedule(data, source) {
+   state.stations = data.stations || [];
+   state.pairs = data.pairs || {};
+   state.meta = data;
++  if (source) state.scheduleSource = source;
+   renderStationOptions();
+   autoAdjustDate();
+   updateStatus();
++  updateScheduleInfo();
++}
++
++/** Format an ISO date string as a Hebrew locale date+time. */
++function formatScheduleDate(isoStr) {
++  if (!isoStr) return null;
++  try {
++    return new Date(isoStr).toLocaleDateString("he-IL", {
++      day: "2-digit", month: "2-digit", year: "numeric",
++      hour: "2-digit", minute: "2-digit",
++    });
++  } catch {
++    return isoStr;
++  }
++}
++
++/** Update the schedule details modal with current metadata. */
++function updateScheduleInfo() {
++  if (!state.meta) return;
++  const formatted = formatScheduleDate(state.meta.generatedAt);
++  if (formatted) elements.scheduleDate.textContent = formatted;
++
++  const bundledFormatted = formatScheduleDate(state.bundledGeneratedAt);
++  if (bundledFormatted) elements.scheduleBundledDate.textContent = bundledFormatted;
++
++  elements.scheduleSource.textContent =
++    SCHEDULE_SOURCE_LABELS[state.scheduleSource] || "—";
++}
++
++/** Show a transient status message in the schedule details modal. */
++function showScheduleStatus(text, cssClass) {
++  elements.scheduleStatus.textContent = text;
++  elements.scheduleStatus.className = cssClass || "";
++  elements.scheduleStatusRow.style.visibility = "visible";
++  elements.scheduleStatusRow.style.opacity = "1";
+ }
+ 
+ function readScheduleCache() {
+@@ -787,46 +865,77 @@ function readScheduleCache() {
+     const parsed = JSON.parse(raw);
+     if (!isValidScheduleShape(parsed)) {
+       localStorage.removeItem(SCHEDULE_CACHE_KEY);
++      localStorage.removeItem(SCHEDULE_ETAG_KEY);
+       return null;
+     }
+     return parsed;
+   } catch {
+-    try { localStorage.removeItem(SCHEDULE_CACHE_KEY); } catch {}
++    try {
++      localStorage.removeItem(SCHEDULE_CACHE_KEY);
++      localStorage.removeItem(SCHEDULE_ETAG_KEY);
++    } catch {}
+     return null;
+   }
+ }
+ 
+-async function refreshScheduleInBackground() {
++/**
++ * Refresh schedule data from localStorage cache and/or CDN.
++ * @param {boolean} allowNetwork - if false, only applies local cache without fetching CDN.
++ * @returns {Promise<"updated"|"already-latest"|"error">}
++ */
++async function refreshScheduleInBackground(allowNetwork = true) {
+   // 1. Apply a newer cached copy if present (no network needed).
+   const cached = readScheduleCache();
+   if (cached && (!state.meta?.generatedAt || cached.generatedAt > state.meta.generatedAt)) {
+-    if (state.step === "form") applySchedule(cached);
++    if (state.step === "form") applySchedule(cached, "cache");
+   }
+ 
++  if (!allowNetwork) return "already-latest";
++
+   // 2. Try to refresh from the CDN.
+   let remote = null;
++  let newEtag = null;
+   try {
++    const cachedEtag = localStorage.getItem(SCHEDULE_ETAG_KEY);
++
++    // 2a. Lightweight HEAD request to check ETag before downloading megabytes of JSON.
++    const headRes = await fetch(REMOTE_SCHEDULE_URL, { 
++      method: "HEAD", 
++      cache: "no-cache",
++      signal: AbortSignal.timeout(5_000) 
++    });
++    if (!headRes.ok) return "error";
++
++    newEtag = headRes.headers.get("etag");
++    if (cachedEtag && newEtag && cachedEtag === newEtag) {
++      return "already-latest";
++    }
++
++    // 2b. ETag changed or missing — fetch full payload.
+     const res = await fetch(REMOTE_SCHEDULE_URL, { signal: AbortSignal.timeout(10_000) });
+-    if (!res.ok) return;
++    if (!res.ok) return "error";
+     remote = await res.json();
++    newEtag = newEtag || res.headers.get("etag");
+   } catch (e) {
+     console.warn("Schedule refresh fetch failed:", e?.message || e);
+-    return;
++    return "error";
+   }
+   if (!isValidScheduleShape(remote)) {
+     console.warn("Schedule refresh: remote payload failed validation");
+-    return;
++    return "error";
+   }
+-  if (state.meta?.generatedAt && !(remote.generatedAt > state.meta.generatedAt)) return;
++  if (state.meta?.generatedAt && !(remote.generatedAt > state.meta.generatedAt)) return "already-latest";
+ 
+   try {
+     localStorage.setItem(SCHEDULE_CACHE_KEY, JSON.stringify(remote));
++    if (newEtag) localStorage.setItem(SCHEDULE_ETAG_KEY, newEtag);
+   } catch (e) {
+     console.warn("Schedule refresh: could not persist cache:", e?.message || e);
+   }
+   // Don't yank the UI under a user mid-OTP or viewing a result — the cache will
+   // pick up next session either way.
+-  if (state.step === "form") applySchedule(remote);
++  if (state.step === "form") applySchedule(remote, "remote");
++  return "updated";
+ }
+ 
+ async function loadData() {
+@@ -834,15 +943,16 @@ async function loadData() {
+     const response = await fetch("rail_times_index.json");
+     const data = await response.json();
+     if (!isValidScheduleShape(data)) throw new Error("bundled rail_times_index.json failed validation");
+-    applySchedule(data);
++    state.bundledGeneratedAt = data.generatedAt || null;
++    applySchedule(data, "bundled");
+   } catch (error) {
+     elements.statusText.textContent = "טעינת נתוני ה-GTFS נכשלה.";
+     console.error(error);
+     return;
+   }
+ 
+-  // Fire-and-forget — never awaited.
+-  refreshScheduleInBackground();
++  // Fire-and-forget — always read cache, but gate network fetch on user preference.
++  refreshScheduleInBackground(isAutoUpdateEnabled());
+ }
+ 
+ // ── Event registration ───────────────────────────────────────────────────────
+@@ -879,6 +989,66 @@ function registerEvents() {
+       localStorage.removeItem("dismissedUpdateVersion");
+     }
+   });
++
++  // ── Schedule details modal ──
++  elements.openScheduleInfo.addEventListener("click", () => {
++    elements.scheduleModal.classList.remove("hidden");
++  });
++  elements.closeScheduleBtn.addEventListener("click", () => {
++    elements.scheduleModal.classList.add("hidden");
++  });
++  elements.scheduleModal.addEventListener("click", (e) => {
++    if (e.target === elements.scheduleModal) elements.scheduleModal.classList.add("hidden");
++  });
++
++  elements.refreshScheduleBtn.addEventListener("click", async () => {
++    showScheduleStatus("מעדכן...", "");
++    elements.refreshScheduleBtn.disabled = true;
++    try {
++      const result = await refreshScheduleInBackground();
++      if (result === "updated") {
++        showScheduleStatus("✓ לוח הזמנים עודכן", "success");
++      } else if (result === "already-latest") {
++        showScheduleStatus("✓ לוח הזמנים מעודכן", "success");
++      } else {
++        showScheduleStatus("✗ העדכון נכשל", "error");
++      }
++    } catch {
++      showScheduleStatus("✗ העדכון נכשל", "error");
++    }
++    elements.refreshScheduleBtn.disabled = false;
++    setTimeout(() => {
++      elements.scheduleStatusRow.style.visibility = "hidden";
++      elements.scheduleStatusRow.style.opacity = "0";
++    }, 3000);
++  });
++
++  elements.resetScheduleBtn.addEventListener("click", async () => {
++    try {
++      localStorage.removeItem(SCHEDULE_CACHE_KEY);
++      localStorage.removeItem(SCHEDULE_ETAG_KEY);
++    } catch {}
++    // Load bundled data directly — don't use loadData() which re-triggers
++    // the background refresh and would immediately undo the reset.
++    try {
++      const response = await fetch("rail_times_index.json");
++      const data = await response.json();
++      if (!isValidScheduleShape(data)) throw new Error("bundled data failed validation");
++      state.bundledGeneratedAt = data.generatedAt || null;
++      applySchedule(data, "bundled");
++      showScheduleStatus("✓ הלוח אופס למובנה", "success");
++    } catch {
++      showScheduleStatus("✗ האיפוס נכשל", "error");
++    }
++    setTimeout(() => {
++      elements.scheduleStatusRow.style.visibility = "hidden";
++      elements.scheduleStatusRow.style.opacity = "0";
++    }, 3000);
++  });
++
++  elements.autoUpdateSchedule.addEventListener("change", () => {
++    localStorage.setItem(AUTO_UPDATE_KEY, elements.autoUpdateSchedule.checked ? "1" : "0");
++  });
+ }
+ 
+ // ── Init ─────────────────────────────────────────────────────────────────────
+diff --git a/www/index.html b/www/index.html
+index fae6368..beb5337 100644
+--- a/www/index.html
++++ b/www/index.html
+@@ -106,12 +106,34 @@
+           <span>אל תציג שוב חלון זה עבור גרסה זו</span>
+         </label>
+       </div>
++      <a id="openScheduleInfo" class="schedule-link">פרטי לוח זמנים ›</a>
+       <p class="microcopy">פרויקט בקוד פתוח:</p>
+       <a href="https://github.com/yomach/train_ticket" target="_blank" class="repo-link">GitHub Repository</a>
+       <button type="button" id="closeAboutBtn" class="primary-btn" style="margin-top: 20px; width: 100%;">סגור</button>
+     </div>
+   </div>
+ 
++  <div id="scheduleModal" class="modal-overlay hidden">
++    <div class="modal-card">
++      <h2>פרטי לוח זמנים</h2>
++      <div class="schedule-info">
++        <p>תאריך לוח זמנים נוכחי: <strong id="scheduleDate">טוען...</strong></p>
++        <p>תאריך לוח זמנים מובנה: <span id="scheduleBundledDate">טוען...</span></p>
++        <p>מקור: <span id="scheduleSource">—</span></p>
++        <p id="scheduleStatusRow" class="schedule-status" style="visibility: hidden; opacity: 0; transition: opacity 0.3s; margin: 0; min-height: 1.5em;"><span id="scheduleStatus"></span></p>
++      </div>
++      <label class="schedule-auto-update" style="display: flex; flex-direction: row; align-items: center; justify-content: flex-start; gap: 6px; margin-bottom: 14px; font-size: 0.85rem; color: var(--text); cursor: pointer;">
++        <input type="checkbox" id="autoUpdateSchedule" checked style="width: auto; margin: 0; padding: 0; border: none; background: transparent; flex-shrink: 0;">
++        <span style="flex: 1; text-align: right; white-space: normal;">עדכון אוטומטי של לוח הזמנים</span>
++      </label>
++      <div class="schedule-actions">
++        <button type="button" id="refreshScheduleBtn" class="secondary-btn">רענן לוח זמנים</button>
++        <button type="button" id="resetScheduleBtn" class="secondary-btn">אפס למובנה</button>
++      </div>
++      <button type="button" id="closeScheduleBtn" class="primary-btn" style="margin-top: 20px; width: 100%;">סגור</button>
++    </div>
++  </div>
++
+   <script src="vendor/qrcode.min.js"></script>
+   <script src="booking-helpers.js"></script>
+   <script src="schedule-helpers.js"></script>
+diff --git a/www/styles.css b/www/styles.css
+index 8cb8df9..0255580 100644
+--- a/www/styles.css
++++ b/www/styles.css
+@@ -275,3 +275,85 @@ select {
+     flex-direction: column;
+   }
+ }
++
++/* Schedule info link in About */
++.schedule-link {
++  display: block;
++  margin: 0 0 14px;
++  color: var(--muted);
++  font-size: 0.85rem;
++  cursor: pointer;
++  text-decoration: none;
++  transition: color 0.2s;
++}
++
++.schedule-link:hover {
++  color: var(--accent);
++}
++
++/* Schedule details modal */
++.schedule-info {
++  background: var(--bg);
++  border-radius: 12px;
++  padding: 12px;
++  margin-bottom: 16px;
++  font-size: 0.9rem;
++}
++
++.schedule-info p {
++  margin: 4px 0;
++}
++
++.schedule-actions {
++  display: flex;
++  gap: 10px;
++}
++
++.schedule-actions .secondary-btn {
++  flex: 1;
++  font-size: 0.85rem;
++  padding: 10px 12px;
++}
++
++.schedule-auto-update {
++  display: flex;
++  align-items: center;
++  gap: 6px;
++  margin-bottom: 14px;
++  font-size: 0.85rem;
++  color: var(--text);
++  cursor: pointer;
++}
++
++.schedule-auto-update input[type="checkbox"] {
++  width: auto;
++  padding: 0;
++  margin: 0;
++  border-radius: 0;
++  border: none;
++  background: transparent;
++  flex-shrink: 0;
++}
++
++.schedule-status {
++  transition: opacity 0.3s;
++}
++
++.schedule-status .success {
++  color: #1a7f44;
++  font-weight: 600;
++}
++
++.schedule-status .error {
++  color: #d32f2f;
++  font-weight: 600;
++}
++
++@keyframes spin {
++  to { transform: rotate(360deg); }
++}
++
++.spinning {
++  display: inline-block;
++  animation: spin 1s linear infinite;
++}
+diff --git a/www/version-helpers.js b/www/version-helpers.js
+index aa0e47e..6f496ca 100644
+--- a/www/version-helpers.js
++++ b/www/version-helpers.js
+@@ -31,7 +31,25 @@
+     return 0;
+   }
+ 
+-  const api = { compareVersions };
++  /**
++   * Returns true if upgrading from `current` to `latest` involves a
++   * major or minor bump — i.e. it's NOT a patch-only change.
++   * Used to suppress intrusive update prompts for schedule-only patches.
++   * @param {string} current
++   * @param {string} latest
++   * @returns {boolean}
++   */
++  function isSignificantUpdate(current, latest) {
++    const parse = (v) => {
++      const m = String(v).replace(/^v/, "").match(/^(\d+)\.(\d+)\.(\d+)(.*)$/);
++      return m ? { major: +m[1], minor: +m[2] } : null;
++    };
++    const pc = parse(current), pl = parse(latest);
++    if (!pc || !pl) return false;
++    return pl.major > pc.major || (pl.major === pc.major && pl.minor > pc.minor);
++  }
++
++  const api = { compareVersions, isSignificantUpdate };
+ 
+   if (typeof module !== "undefined" && module.exports) {
+     module.exports = api;

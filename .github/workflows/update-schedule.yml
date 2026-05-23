@@ -49,7 +49,7 @@ jobs:
         id: changes
         run: |
           set -euo pipefail
-          # Ignore generatedAt, generatedFrom, and serviceCount so no-op nightlies
+          # Ignore generatedAt, generatedFrom, serviceCount, and version so no-op nightlies
           # don't churn the repo.
           if git diff --quiet -- www/rail_times_index.json; then
             echo "changed=false" >> "$GITHUB_OUTPUT"
@@ -57,8 +57,8 @@ jobs:
             exit 0
           fi
           diff_payload="$(
-            diff <(jq 'del(.generatedAt,.generatedFrom,.serviceCount)' <(git show HEAD:www/rail_times_index.json)) \
-                 <(jq 'del(.generatedAt,.generatedFrom,.serviceCount)' www/rail_times_index.json) || true
+            diff <(jq 'del(.generatedAt,.generatedFrom,.serviceCount,.version)' <(git show HEAD:www/rail_times_index.json)) \
+                 <(jq 'del(.generatedAt,.generatedFrom,.serviceCount,.version)' www/rail_times_index.json) || true
           )"
           if [ -z "$diff_payload" ]; then
             echo "changed=false" >> "$GITHUB_OUTPUT"
@@ -125,6 +125,9 @@ jobs:
           npm version patch --no-git-tag-version
           NEW_VER=$(node -p "require('./package.json').version")
           echo "NEW_VERSION=$NEW_VER" >> "$GITHUB_ENV"
+
+          # Inject version into the built JSON
+          jq ".version = \"$NEW_VER\"" www/rail_times_index.json > /tmp/rt.json && mv /tmp/rt.json www/rail_times_index.json
 
           # Update CHANGELOG.md
           # Insert a new release block under ## [Unreleased]
