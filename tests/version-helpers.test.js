@@ -1,7 +1,7 @@
 const test = require("node:test");
 const assert = require("node:assert/strict");
 
-const { compareVersions } = require("../www/version-helpers.js");
+const { compareVersions, isSignificantUpdate } = require("../www/version-helpers.js");
 
 const sign = (n) => (n == null ? null : n === 0 ? 0 : n < 0 ? -1 : 1);
 
@@ -52,4 +52,42 @@ test("unparseable input returns null on both sides", () => {
 test("regression: 0.4.0rc1 should not flag 0.3.0 as newer", () => {
   // The exact bug the helper was added to fix.
   assert.equal(sign(compareVersions("0.3.0", "0.4.0rc1")), -1);
+});
+
+// ── isSignificantUpdate ──────────────────────────────────────────────────────
+
+test("isSignificantUpdate: patch-only bump is NOT significant", () => {
+  assert.equal(isSignificantUpdate("0.4.2", "0.4.3"), false);
+  assert.equal(isSignificantUpdate("0.4.0", "0.4.99"), false);
+});
+
+test("isSignificantUpdate: minor bump IS significant", () => {
+  assert.equal(isSignificantUpdate("0.4.2", "0.5.0"), true);
+  assert.equal(isSignificantUpdate("0.4.2", "0.5.1"), true);
+});
+
+test("isSignificantUpdate: major bump IS significant", () => {
+  assert.equal(isSignificantUpdate("0.4.2", "1.0.0"), true);
+  assert.equal(isSignificantUpdate("0.4.2", "2.0.0"), true);
+});
+
+test("isSignificantUpdate: same version is NOT significant", () => {
+  assert.equal(isSignificantUpdate("0.4.2", "0.4.2"), false);
+});
+
+test("isSignificantUpdate: handles v-prefix", () => {
+  assert.equal(isSignificantUpdate("v0.4.2", "v0.5.0"), true);
+  assert.equal(isSignificantUpdate("v0.4.2", "v0.4.3"), false);
+});
+
+test("isSignificantUpdate: unparseable returns false", () => {
+  assert.equal(isSignificantUpdate("weird", "0.5.0"), false);
+  assert.equal(isSignificantUpdate("0.4.0", "weird"), false);
+  assert.equal(isSignificantUpdate(null, "0.5.0"), false);
+  assert.equal(isSignificantUpdate(undefined, "0.5.0"), false);
+});
+
+test("isSignificantUpdate: downgrade is NOT significant", () => {
+  assert.equal(isSignificantUpdate("0.5.0", "0.4.0"), false);
+  assert.equal(isSignificantUpdate("1.0.0", "0.9.0"), false);
 });

@@ -31,7 +31,10 @@ MOT GTFS feed) — the workflow opens a PR when content actually changes,
 ignoring `generatedAt`, `generatedFrom`, and `serviceCount`. The browser also fetches the latest JSON from
 jsDelivr in the background after first paint and applies it if newer
 and valid (only while the user is still on the form step, so the UI
-never gets yanked out from under a booking).
+never gets yanked out from under a booking). This background fetch is
+optimized with an HTTP `HEAD` request to check the CDN's `ETag` before
+downloading the heavy JSON payload, and can be disabled by the user via
+the "Schedule Info" panel.
 
 After successful booking, the FE pre-fetches platform numbers via the
 `searchTrain` endpoint (`POST /rjpa/api/v1/timetable/searchTrain`, JSON
@@ -186,6 +189,7 @@ The general rule: anything that only exists to make `wrangler dev`
 | `www/app.js` | All FE logic: form state, OTP flow, cookies, `apiPost`, native vs browser branch, `searchTrain` pre-fetch, background schedule refresh |
 | `www/booking-helpers.js` | URL builder + redirect-fallback heuristic, exposed for tests |
 | `www/schedule-helpers.js` | Pure validators / extractors (`isValidScheduleShape`, `sanitizePlatform`, `extractPlatforms`, `tripKey`) — shared by app + Node tests |
+| `www/version-helpers.js` | Semver comparators (`compareVersions`, `isSignificantUpdate`) used to conditionally show update popups. |
 | `www/index.html` | Three steps: form → OTP → result (result includes trip summary + platform line) |
 | `www/rail_times_index.json` | GTFS index of valid trips. Rebuilt daily by CI |
 | `www/vendor/qrcode.min.js` | Vendored qrcodejs (was a CDN script) |
