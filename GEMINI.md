@@ -37,3 +37,4 @@
 
 ## AI Agent Rules
 1. **Always Sync First:** Before starting any coding task, run `git fetch` and check if the local branch is behind `origin/main`. If the repository is out of sync (e.g. because the bot auto-merged a schedule update), you MUST prompt the user to commit or stash their work and pull the latest `main` before proceeding.
+2. **Review Before Fixing:** When utilizing a subagent to perform a code or PR review, you must always pause and share the subagent's raw findings with the user for discussion and explicit approval *before* proceeding to make edits and push commits.
