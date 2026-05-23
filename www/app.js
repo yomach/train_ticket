@@ -961,6 +961,7 @@ async function loadData() {
     const data = await response.json();
     if (!isValidScheduleShape(data)) throw new Error("bundled rail_times_index.json failed validation");
     state.bundledGeneratedAt = data.generatedAt || null;
+    state.bundledVersion = data.version || null;
     applySchedule(data, "bundled");
   } catch (error) {
     elements.statusText.textContent = "טעינת נתוני ה-GTFS נכשלה.";
