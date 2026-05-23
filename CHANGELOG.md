@@ -11,7 +11,7 @@ All notable changes to this project will be documented in this file.
 - **Auto-Update Toggle.** Added a checkbox in the schedule panel to opt out of background schedule updates.
 
 ### Changed
-- **Smarter Update Prompts.** The app will no longer pop up the "New Version" dialog for patch-only updates (e.g., automated schedule refreshes). The red dot will still appear, but the intrusive popup is reserved for minor/major feature updates.
+- **Smarter Update Prompts.** The app will no longer pop up the "New Version" dialog or display a red dot badge for patch-only updates (e.g., automated schedule refreshes). The intrusive popup and badge are now reserved exclusively for minor and major feature updates.
 - **Optimized Network Fetch.** Background schedule refreshes now perform a lightweight `HEAD` request to check the jsDelivr CDN's `ETag` before downloading. This avoids pulling down the 3MB JSON file if the data hasn't actually changed.
 - **Offline Reliability.** Forced `cache: "no-cache"` on manual schedule refreshes to prevent the browser from spoofing a successful refresh from its offline cache when there's no internet connection.
 
