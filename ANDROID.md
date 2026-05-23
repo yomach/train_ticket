@@ -127,5 +127,5 @@ and reinstall.
 
 - iOS app (would need `npx cap add ios` + Xcode on Mac; not on WSL2).
 - Play Store distribution. Sideload only.
-- Auto-update / in-app update. Rebuild + reinstall.
+- Auto-update / in-app update. The APK itself must be updated via manual download and reinstall (though the app alerts you when a new release is available). However, the internal train schedule JSON updates itself automatically in the background without needing an app update.
 - Migrating the browser FE off the proxy (browsers still need CORS bypass).
