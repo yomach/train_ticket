@@ -28,7 +28,7 @@ toStation, time, trainNumber)` tuples; the FE uses it to build dropdowns
 without hitting the API for trip discovery. It's rebuilt daily by the
 `Update rail schedule` GitHub Action (`scripts/build-schedule.js` + the
 MOT GTFS feed) — the workflow opens a PR when content actually changes,
-ignoring `generatedAt`, `generatedFrom`, and `serviceCount`. The browser also fetches the latest JSON from
+ignoring `generatedAt`, `generatedFrom`, `serviceCount`, and `version`. The workflow explicitly injects the newly bumped `package.json` patch version into the JSON payload (as `.version`) before committing, allowing the browser to display the exact app version a given schedule correlates to. The browser also fetches the latest JSON from
 jsDelivr in the background after first paint and applies it if newer
 and valid (only while the user is still on the form step, so the UI
 never gets yanked out from under a booking). This background fetch is
