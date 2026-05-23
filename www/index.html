@@ -106,9 +106,31 @@
           <span>אל תציג שוב חלון זה עבור גרסה זו</span>
         </label>
       </div>
+      <a id="openScheduleInfo" class="schedule-link">פרטי לוח זמנים ›</a>
       <p class="microcopy">פרויקט בקוד פתוח:</p>
       <a href="https://github.com/yomach/train_ticket" target="_blank" class="repo-link">GitHub Repository</a>
       <button type="button" id="closeAboutBtn" class="primary-btn" style="margin-top: 20px; width: 100%;">סגור</button>
+    </div>
+  </div>
+
+  <div id="scheduleModal" class="modal-overlay hidden">
+    <div class="modal-card">
+      <h2>פרטי לוח זמנים</h2>
+      <div class="schedule-info">
+        <p>תאריך לוח זמנים נוכחי: <strong id="scheduleDate">טוען...</strong></p>
+        <p>תאריך לוח זמנים מובנה: <span id="scheduleBundledDate">טוען...</span></p>
+        <p>מקור: <span id="scheduleSource">—</span></p>
+        <p id="scheduleStatusRow" class="schedule-status" style="visibility: hidden; opacity: 0; transition: opacity 0.3s; margin: 0; min-height: 1.5em;"><span id="scheduleStatus"></span></p>
+      </div>
+      <label class="schedule-auto-update" style="display: flex; flex-direction: row; align-items: center; justify-content: flex-start; gap: 6px; margin-bottom: 14px; font-size: 0.85rem; color: var(--text); cursor: pointer;">
+        <input type="checkbox" id="autoUpdateSchedule" checked style="width: auto; margin: 0; padding: 0; border: none; background: transparent; flex-shrink: 0;">
+        <span style="flex: 1; text-align: right; white-space: normal;">עדכון אוטומטי של לוח הזמנים</span>
+      </label>
+      <div class="schedule-actions">
+        <button type="button" id="refreshScheduleBtn" class="secondary-btn">רענן לוח זמנים</button>
+        <button type="button" id="resetScheduleBtn" class="secondary-btn">אפס למובנה</button>
+      </div>
+      <button type="button" id="closeScheduleBtn" class="primary-btn" style="margin-top: 20px; width: 100%;">סגור</button>
     </div>
   </div>
 

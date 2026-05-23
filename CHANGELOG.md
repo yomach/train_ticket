@@ -4,17 +4,26 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-05-23
+
+### Added
+- **Schedule Info Modal.** Added a new power-user panel accessible from the "About" dialog ("פרטי לוח זמנים ›"). It displays the currently active schedule date vs. the bundled date, and provides manual "Refresh" and "Reset" controls.
+- **Auto-Update Toggle.** Added a checkbox in the schedule panel to opt out of background schedule updates.
+
+### Changed
+- **Smarter Update Prompts.** The app will no longer pop up the "New Version" dialog or display a red dot badge for patch-only updates (e.g., automated schedule refreshes). The intrusive popup and badge are now reserved exclusively for minor and major feature updates.
+- **Optimized Network Fetch.** Background schedule refreshes now perform a lightweight `HEAD` request to check the jsDelivr CDN's `ETag` before downloading. This avoids pulling down the 3MB JSON file if the data hasn't actually changed.
+- **Offline Reliability.** Forced `cache: "no-cache"` on manual schedule refreshes to prevent the browser from spoofing a successful refresh from its offline cache when there's no internet connection.
+
 ## [0.4.4] - 2026-05-22
 
 ### Changed
 - **Schedule Refresh.** Updated train schedule.
 
-
 ## [0.4.3] - 2026-05-21
 
 ### Changed
 - **Schedule Refresh.** Updated train schedule.
-
 
 ## [0.4.2] - 2026-05-17
 

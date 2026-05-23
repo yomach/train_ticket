@@ -16,8 +16,8 @@
 - **Test:** `npm test` (Node.js test runner)
 
 ### Release Flow
-- **Tagging:** `git tag -a vX.Y.Z -m "Release version X.Y.Z" && git push origin vX.Y.Z`
-- **Create Release:** Use `gh release create vX.Y.Z ...` to publish the APK.
+- **Fully Automated:** When a PR containing a version bump in `package.json` is merged to `main`, the `Release` GitHub Action automatically creates the `vX.Y.Z` git tag.
+- **APK Generation:** That same Action builds the Android APK and publishes a formal GitHub Release automatically. No manual tagging or `gh release` commands are needed.
 
 ## Maintenance & Debugging
 - **API Breakers:** rail.co.il rotates `Ocp-Apim-Subscription-Key` and endpoint schemas.
@@ -34,3 +34,6 @@
 - **Languages:** Use literal string `"Hebrew"`.
 - **Cookies:** Hand-rolled helpers in `app.js` (1-year expiry, `path=/`).
 - **Sync:** Always update both `cloudflare-worker/worker.js` and `www/app.js` (native branch) when API headers or schemas change.
+
+## AI Agent Rules
+1. **Always Sync First:** Before starting any coding task, run `git fetch` and check if the local branch is behind `origin/main`. If the repository is out of sync (e.g. because the bot auto-merged a schedule update), you MUST prompt the user to commit or stash their work and pull the latest `main` before proceeding.

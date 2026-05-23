@@ -275,3 +275,85 @@ select {
     flex-direction: column;
   }
 }
+
+/* Schedule info link in About */
+.schedule-link {
+  display: block;
+  margin: 0 0 14px;
+  color: var(--muted);
+  font-size: 0.85rem;
+  cursor: pointer;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.schedule-link:hover {
+  color: var(--accent);
+}
+
+/* Schedule details modal */
+.schedule-info {
+  background: var(--bg);
+  border-radius: 12px;
+  padding: 12px;
+  margin-bottom: 16px;
+  font-size: 0.9rem;
+}
+
+.schedule-info p {
+  margin: 4px 0;
+}
+
+.schedule-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.schedule-actions .secondary-btn {
+  flex: 1;
+  font-size: 0.85rem;
+  padding: 10px 12px;
+}
+
+.schedule-auto-update {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 14px;
+  font-size: 0.85rem;
+  color: var(--text);
+  cursor: pointer;
+}
+
+.schedule-auto-update input[type="checkbox"] {
+  width: auto;
+  padding: 0;
+  margin: 0;
+  border-radius: 0;
+  border: none;
+  background: transparent;
+  flex-shrink: 0;
+}
+
+.schedule-status {
+  transition: opacity 0.3s;
+}
+
+.schedule-status .success {
+  color: #1a7f44;
+  font-weight: 600;
+}
+
+.schedule-status .error {
+  color: #d32f2f;
+  font-weight: 600;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.spinning {
+  display: inline-block;
+  animation: spin 1s linear infinite;
+}

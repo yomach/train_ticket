@@ -69,6 +69,10 @@ const state = {
   // Platform info pre-fetched at submit; consumed at showResult.
   platformInfoPromise: null,
   platformInfoTripKey: "",
+  // Source of the active schedule data: "bundled" | "cache" | "remote"
+  scheduleSource: null,
+  // generatedAt from the bundled rail_times_index.json (persists across refreshes)
+  bundledGeneratedAt: null,
 };
 
 if (!window.ScheduleHelpers) {
@@ -115,9 +119,21 @@ const elements = {
   latestVersionLink: document.getElementById("latestVersionLink"),
   dismissUpdateRow: document.getElementById("dismissUpdateRow"),
   dismissUpdateCheckbox: document.getElementById("dismissUpdateCheckbox"),
+  // schedule details
+  openScheduleInfo: document.getElementById("openScheduleInfo"),
+  scheduleModal: document.getElementById("scheduleModal"),
+  closeScheduleBtn: document.getElementById("closeScheduleBtn"),
+  scheduleDate: document.getElementById("scheduleDate"),
+  scheduleBundledDate: document.getElementById("scheduleBundledDate"),
+  scheduleSource: document.getElementById("scheduleSource"),
+  scheduleStatusRow: document.getElementById("scheduleStatusRow"),
+  scheduleStatus: document.getElementById("scheduleStatus"),
+  refreshScheduleBtn: document.getElementById("refreshScheduleBtn"),
+  resetScheduleBtn: document.getElementById("resetScheduleBtn"),
+  autoUpdateSchedule: document.getElementById("autoUpdateSchedule"),
 };
 
-const VERSION = "0.4.4";
+const VERSION = "0.5.0";
 
 // ── Step navigation ──────────────────────────────────────────────────────────
 
@@ -137,7 +153,7 @@ function showAbout(visible) {
 
 // ── Version Check ────────────────────────────────────────────────────────────
 
-const { compareVersions } = window.VersionHelpers || {};
+const { compareVersions, isSignificantUpdate } = window.VersionHelpers || {};
 if (!compareVersions) {
   document.getElementById("statusText")?.replaceChildren("שגיאה בטעינת מודול העזר.");
   throw new Error("VersionHelpers script failed to load");
@@ -172,13 +188,20 @@ async function checkVersion() {
 
     const cmp = compareVersions(latest, VERSION);
     if (cmp != null && cmp > 0) {
-      elements.aboutBtn.classList.add("has-update");
-      const dismissed = localStorage.getItem("dismissedUpdateVersion");
-      elements.dismissUpdateCheckbox.checked = dismissed === latest;
-      elements.dismissUpdateRow.dataset.version = latest;
-      elements.dismissUpdateRow.classList.remove("hidden");
-      // Auto-popup only the first time the user sees this latest version.
-      if (dismissed !== latest) showAbout(true);
+      // Only badge + auto-popup for minor/major bumps. Patch-only bumps
+      // (schedule refreshes) are visible in About but never intrusive.
+      const significant = isSignificantUpdate(VERSION, latest);
+      if (significant) {
+        elements.aboutBtn.classList.add("has-update");
+        const dismissed = localStorage.getItem("dismissedUpdateVersion");
+        elements.dismissUpdateCheckbox.checked = dismissed === latest;
+        elements.dismissUpdateRow.dataset.version = latest;
+        elements.dismissUpdateRow.classList.remove("hidden");
+        // Auto-popup only the first time the user sees this latest version.
+        if (dismissed !== latest) showAbout(true);
+      } else {
+        elements.dismissUpdateRow.classList.add("hidden");
+      }
     } else {
       // Fail closed on unparseable tags (cmp == null) — no spurious popup.
       elements.dismissUpdateRow.classList.add("hidden");
@@ -770,14 +793,83 @@ function handleDirectionClick(event) {
 // ── Data loading ─────────────────────────────────────────────────────────────
 
 const SCHEDULE_CACHE_KEY = "scheduleCache";
+const SCHEDULE_ETAG_KEY = "scheduleEtag";
+const AUTO_UPDATE_KEY = "autoUpdateSchedule";
 
-function applySchedule(data) {
+// Initialize auto-update checkbox from localStorage (default: enabled).
+(function initAutoUpdate() {
+  const stored = localStorage.getItem(AUTO_UPDATE_KEY);
+  // null (never set) = default on; "0" = user disabled
+  elements.autoUpdateSchedule.checked = stored !== "0";
+})();
+
+function isAutoUpdateEnabled() {
+  return elements.autoUpdateSchedule.checked;
+}
+
+const SCHEDULE_SOURCE_LABELS = {
+  bundled: "גרסה מובנית",
+  cache: "מטמון מקומי",
+  remote: "עדכון רקע",
+};
+
+function applySchedule(data, source) {
   state.stations = data.stations || [];
   state.pairs = data.pairs || {};
   state.meta = data;
+  if (source) state.scheduleSource = source;
   renderStationOptions();
   autoAdjustDate();
   updateStatus();
+  updateScheduleInfo();
+}
+
+/** Format an ISO date string as a Hebrew locale date+time. */
+function formatScheduleDate(isoStr) {
+  if (!isoStr) return null;
+  try {
+    return new Date(isoStr).toLocaleDateString("he-IL", {
+      day: "2-digit", month: "2-digit", year: "numeric"
+    });
+  } catch {
+    return isoStr;
+  }
+}
+
+function formatScheduleVersion(version, isoStr) {
+  const dateStr = formatScheduleDate(isoStr);
+  if (!version && !dateStr) return "טוען...";
+  if (!version) return dateStr;
+  if (!dateStr) return `v${version}`;
+  return `v${version} (${dateStr})`;
+}
+
+/** Update the schedule details modal with current metadata. */
+function updateScheduleInfo() {
+  if (!state.meta) return;
+  elements.scheduleDate.textContent = formatScheduleVersion(state.meta.version, state.meta.generatedAt);
+  elements.scheduleBundledDate.textContent = formatScheduleVersion(state.bundledVersion || VERSION, state.bundledGeneratedAt);
+
+  elements.scheduleSource.textContent =
+    SCHEDULE_SOURCE_LABELS[state.scheduleSource] || "—";
+}
+
+let scheduleStatusTimeout = null;
+
+/** Show a transient status message in the schedule details modal. */
+function showScheduleStatus(text, cssClass) {
+  elements.scheduleStatus.textContent = text;
+  elements.scheduleStatus.className = cssClass || "";
+  elements.scheduleStatusRow.style.visibility = "visible";
+  elements.scheduleStatusRow.style.opacity = "1";
+}
+
+function hideScheduleStatusAfterDelay() {
+  if (scheduleStatusTimeout) clearTimeout(scheduleStatusTimeout);
+  scheduleStatusTimeout = setTimeout(() => {
+    elements.scheduleStatusRow.style.visibility = "hidden";
+    elements.scheduleStatusRow.style.opacity = "0";
+  }, 3000);
 }
 
 function readScheduleCache() {
@@ -787,46 +879,80 @@ function readScheduleCache() {
     const parsed = JSON.parse(raw);
     if (!isValidScheduleShape(parsed)) {
       localStorage.removeItem(SCHEDULE_CACHE_KEY);
+      localStorage.removeItem(SCHEDULE_ETAG_KEY);
       return null;
     }
     return parsed;
   } catch {
-    try { localStorage.removeItem(SCHEDULE_CACHE_KEY); } catch {}
+    try {
+      localStorage.removeItem(SCHEDULE_CACHE_KEY);
+      localStorage.removeItem(SCHEDULE_ETAG_KEY);
+    } catch {}
     return null;
   }
 }
 
-async function refreshScheduleInBackground() {
+/**
+ * Refresh schedule data from localStorage cache and/or CDN.
+ * @param {boolean} allowNetwork - if false, only applies local cache without fetching CDN.
+ * @returns {Promise<"updated"|"already-latest"|"error">}
+ */
+async function refreshScheduleInBackground(allowNetwork = true) {
   // 1. Apply a newer cached copy if present (no network needed).
   const cached = readScheduleCache();
   if (cached && (!state.meta?.generatedAt || cached.generatedAt > state.meta.generatedAt)) {
-    if (state.step === "form") applySchedule(cached);
+    if (state.step === "form") applySchedule(cached, "cache");
   }
+
+  if (!allowNetwork) return "already-latest";
 
   // 2. Try to refresh from the CDN.
   let remote = null;
+  let newEtag = null;
   try {
-    const res = await fetch(REMOTE_SCHEDULE_URL, { signal: AbortSignal.timeout(10_000) });
-    if (!res.ok) return;
+    const cachedEtag = localStorage.getItem(SCHEDULE_ETAG_KEY);
+
+    // 2a. Lightweight HEAD request to check ETag before downloading megabytes of JSON.
+    const headRes = await fetch(REMOTE_SCHEDULE_URL, { 
+      method: "HEAD", 
+      cache: "no-cache",
+      signal: AbortSignal.timeout(5_000) 
+    });
+    if (!headRes.ok) return "error";
+
+    newEtag = headRes.headers.get("etag");
+    if (cachedEtag && newEtag && cachedEtag === newEtag) {
+      return "already-latest";
+    }
+
+    // 2b. ETag changed or missing — fetch full payload.
+    const res = await fetch(REMOTE_SCHEDULE_URL, { 
+      cache: "no-cache",
+      signal: AbortSignal.timeout(10_000) 
+    });
+    if (!res.ok) return "error";
     remote = await res.json();
+    newEtag = newEtag || res.headers.get("etag");
   } catch (e) {
     console.warn("Schedule refresh fetch failed:", e?.message || e);
-    return;
+    return "error";
   }
   if (!isValidScheduleShape(remote)) {
     console.warn("Schedule refresh: remote payload failed validation");
-    return;
+    return "error";
   }
-  if (state.meta?.generatedAt && !(remote.generatedAt > state.meta.generatedAt)) return;
+  if (state.meta?.generatedAt && !(remote.generatedAt > state.meta.generatedAt)) return "already-latest";
 
   try {
     localStorage.setItem(SCHEDULE_CACHE_KEY, JSON.stringify(remote));
+    if (newEtag) localStorage.setItem(SCHEDULE_ETAG_KEY, newEtag);
   } catch (e) {
     console.warn("Schedule refresh: could not persist cache:", e?.message || e);
   }
   // Don't yank the UI under a user mid-OTP or viewing a result — the cache will
   // pick up next session either way.
-  if (state.step === "form") applySchedule(remote);
+  if (state.step === "form") applySchedule(remote, "remote");
+  return "updated";
 }
 
 async function loadData() {
@@ -834,15 +960,17 @@ async function loadData() {
     const response = await fetch("rail_times_index.json");
     const data = await response.json();
     if (!isValidScheduleShape(data)) throw new Error("bundled rail_times_index.json failed validation");
-    applySchedule(data);
+    state.bundledGeneratedAt = data.generatedAt || null;
+    state.bundledVersion = data.version || null;
+    applySchedule(data, "bundled");
   } catch (error) {
     elements.statusText.textContent = "טעינת נתוני ה-GTFS נכשלה.";
     console.error(error);
     return;
   }
 
-  // Fire-and-forget — never awaited.
-  refreshScheduleInBackground();
+  // Fire-and-forget — always read cache, but gate network fetch on user preference.
+  refreshScheduleInBackground(isAutoUpdateEnabled());
 }
 
 // ── Event registration ───────────────────────────────────────────────────────
@@ -878,6 +1006,61 @@ function registerEvents() {
     } else {
       localStorage.removeItem("dismissedUpdateVersion");
     }
+  });
+
+  // ── Schedule details modal ──
+  elements.openScheduleInfo.addEventListener("click", () => {
+    elements.scheduleModal.classList.remove("hidden");
+  });
+  elements.closeScheduleBtn.addEventListener("click", () => {
+    elements.scheduleModal.classList.add("hidden");
+  });
+  elements.scheduleModal.addEventListener("click", (e) => {
+    if (e.target === elements.scheduleModal) elements.scheduleModal.classList.add("hidden");
+  });
+
+  elements.refreshScheduleBtn.addEventListener("click", async () => {
+    showScheduleStatus("מעדכן...", "");
+    elements.refreshScheduleBtn.disabled = true;
+    try {
+      const result = await refreshScheduleInBackground();
+      if (result === "updated") {
+        showScheduleStatus("✓ לוח הזמנים עודכן", "success");
+      } else if (result === "already-latest") {
+        showScheduleStatus("✓ לוח הזמנים מעודכן", "success");
+      } else {
+        showScheduleStatus("✗ העדכון נכשל", "error");
+      }
+    } catch {
+      showScheduleStatus("✗ העדכון נכשל", "error");
+    }
+    elements.refreshScheduleBtn.disabled = false;
+    hideScheduleStatusAfterDelay();
+  });
+
+  elements.resetScheduleBtn.addEventListener("click", async () => {
+    try {
+      localStorage.removeItem(SCHEDULE_CACHE_KEY);
+      localStorage.removeItem(SCHEDULE_ETAG_KEY);
+    } catch {}
+    // Load bundled data directly — don't use loadData() which re-triggers
+    // the background refresh and would immediately undo the reset.
+    try {
+      const response = await fetch("rail_times_index.json");
+      const data = await response.json();
+      if (!isValidScheduleShape(data)) throw new Error("bundled data failed validation");
+      state.bundledGeneratedAt = data.generatedAt || null;
+      state.bundledVersion = data.version || null;
+      applySchedule(data, "bundled");
+      showScheduleStatus("✓ הלוח אופס למובנה", "success");
+    } catch {
+      showScheduleStatus("✗ האיפוס נכשל", "error");
+    }
+    hideScheduleStatusAfterDelay();
+  });
+
+  elements.autoUpdateSchedule.addEventListener("change", () => {
+    localStorage.setItem(AUTO_UPDATE_KEY, elements.autoUpdateSchedule.checked ? "1" : "0");
   });
 }
 

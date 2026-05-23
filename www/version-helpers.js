@@ -31,7 +31,25 @@
     return 0;
   }
 
-  const api = { compareVersions };
+  /**
+   * Returns true if upgrading from `current` to `latest` involves a
+   * major or minor bump — i.e. it's NOT a patch-only change.
+   * Used to suppress intrusive update prompts for schedule-only patches.
+   * @param {string} current
+   * @param {string} latest
+   * @returns {boolean}
+   */
+  function isSignificantUpdate(current, latest) {
+    const parse = (v) => {
+      const m = String(v).replace(/^v/, "").match(/^(\d+)\.(\d+)\.(\d+)(.*)$/);
+      return m ? { major: +m[1], minor: +m[2] } : null;
+    };
+    const pc = parse(current), pl = parse(latest);
+    if (!pc || !pl) return false;
+    return pl.major > pc.major || (pl.major === pc.major && pl.minor > pc.minor);
+  }
+
+  const api = { compareVersions, isSignificantUpdate };
 
   if (typeof module !== "undefined" && module.exports) {
     module.exports = api;
