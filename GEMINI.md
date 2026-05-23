@@ -38,3 +38,4 @@
 
 ## AI Agent Rules
 1. **Always Sync First:** Before starting any coding task, run `git fetch` and check if the local branch is behind `origin/main`. If the repository is out of sync (e.g. because the bot auto-merged a schedule update), you MUST prompt the user to commit or stash their work and pull the latest `main` before proceeding.
+2. **Never Push Directly to Main:** All code changes must be done on a separate branch and submitted via a Pull Request. Do not push directly to `main`.
