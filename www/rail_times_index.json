@@ -1,9 +1,9 @@
 {
   "generatedFrom": "gtfs.zip",
-  "generatedAt": "2026-05-22T07:36:55.487Z",
+  "generatedAt": "2026-05-25T08:11:52.179Z",
   "agencyId": "2",
   "serviceMode": "all-days",
-  "serviceCount": 54108,
+  "serviceCount": 52932,
   "stationCount": 66,
   "pairCount": 16,
   "stations": [
@@ -6325,6 +6325,19 @@
         ]
       },
       {
+        "trainNumber": "8718",
+        "departureTime": "07:24:00",
+        "arrivalTime": "08:05:00",
+        "routeId": "44041",
+        "days": [
+          0,
+          1,
+          2,
+          3,
+          4
+        ]
+      },
+      {
         "trainNumber": "6724",
         "departureTime": "07:39:00",
         "arrivalTime": "08:20:00",
@@ -7369,6 +7382,19 @@
         ]
       },
       {
+        "trainNumber": "8718",
+        "departureTime": "07:24:00",
+        "arrivalTime": "08:00:00",
+        "routeId": "44041",
+        "days": [
+          0,
+          1,
+          2,
+          3,
+          4
+        ]
+      },
+      {
         "trainNumber": "6724",
         "departureTime": "07:39:00",
         "arrivalTime": "08:15:00",
@@ -7986,6 +8012,19 @@
         "departureTime": "07:09:00",
         "arrivalTime": "07:40:00",
         "routeId": "30278",
+        "days": [
+          0,
+          1,
+          2,
+          3,
+          4
+        ]
+      },
+      {
+        "trainNumber": "8718",
+        "departureTime": "07:24:00",
+        "arrivalTime": "07:55:00",
+        "routeId": "44041",
         "days": [
           0,
           1,
@@ -8708,6 +8747,19 @@
         "departureTime": "07:09:00",
         "arrivalTime": "07:29:00",
         "routeId": "30278",
+        "days": [
+          0,
+          1,
+          2,
+          3,
+          4
+        ]
+      },
+      {
+        "trainNumber": "8718",
+        "departureTime": "07:24:00",
+        "arrivalTime": "07:44:00",
+        "routeId": "44041",
         "days": [
           0,
           1,
@@ -9987,5 +10039,5 @@
       }
     ]
   },
-  "version": "0.5.0"
+  "version": "0.5.1"
 }
