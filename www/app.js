@@ -133,7 +133,7 @@ const elements = {
   autoUpdateSchedule: document.getElementById("autoUpdateSchedule"),
 };
 
-const VERSION = "0.5.1";
+const VERSION = "0.5.2";
 
 // ── Step navigation ──────────────────────────────────────────────────────────
 
