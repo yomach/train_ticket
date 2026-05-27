@@ -1,9 +1,9 @@
 {
   "generatedFrom": "gtfs.zip",
-  "generatedAt": "2026-05-26T07:35:59.472Z",
+  "generatedAt": "2026-05-27T07:56:02.414Z",
   "agencyId": "2",
   "serviceMode": "all-days",
-  "serviceCount": 48398,
+  "serviceCount": 39632,
   "stationCount": 66,
   "pairCount": 16,
   "stations": [
@@ -2572,15 +2572,6 @@
         ]
       },
       {
-        "trainNumber": "8763",
-        "departureTime": "18:21:00",
-        "arrivalTime": "19:06:00",
-        "routeId": "44077",
-        "days": [
-          2
-        ]
-      },
-      {
         "trainNumber": "765",
         "departureTime": "18:35:00",
         "arrivalTime": "19:22:00",
@@ -3604,15 +3595,6 @@
         ]
       },
       {
-        "trainNumber": "8763",
-        "departureTime": "18:23:00",
-        "arrivalTime": "19:06:00",
-        "routeId": "44077",
-        "days": [
-          2
-        ]
-      },
-      {
         "trainNumber": "765",
         "departureTime": "18:39:00",
         "arrivalTime": "19:22:00",
@@ -4228,15 +4210,6 @@
           2,
           3,
           4
-        ]
-      },
-      {
-        "trainNumber": "8763",
-        "departureTime": "18:29:00",
-        "arrivalTime": "19:06:00",
-        "routeId": "44077",
-        "days": [
-          2
         ]
       },
       {
@@ -6907,15 +6880,6 @@
         ]
       },
       {
-        "trainNumber": "8790",
-        "departureTime": "23:15:00",
-        "arrivalTime": "23:54:00",
-        "routeId": "43077",
-        "days": [
-          2
-        ]
-      },
-      {
         "trainNumber": "784",
         "departureTime": "23:32:00",
         "arrivalTime": "24:10:00",
@@ -7973,15 +7937,6 @@
         ]
       },
       {
-        "trainNumber": "8790",
-        "departureTime": "23:15:00",
-        "arrivalTime": "23:49:00",
-        "routeId": "43077",
-        "days": [
-          2
-        ]
-      },
-      {
         "trainNumber": "784",
         "departureTime": "23:32:00",
         "arrivalTime": "24:06:00",
@@ -8621,15 +8576,6 @@
         ]
       },
       {
-        "trainNumber": "8790",
-        "departureTime": "23:15:00",
-        "arrivalTime": "23:44:00",
-        "routeId": "43077",
-        "days": [
-          2
-        ]
-      },
-      {
         "trainNumber": "784",
         "departureTime": "23:32:00",
         "arrivalTime": "24:02:00",
@@ -8649,15 +8595,6 @@
         "routeId": "34628",
         "days": [
           6
-        ]
-      },
-      {
-        "trainNumber": "8792",
-        "departureTime": "23:55:00",
-        "arrivalTime": "24:24:00",
-        "routeId": "33232",
-        "days": [
-          2
         ]
       }
     ],
@@ -9958,15 +9895,6 @@
         ]
       },
       {
-        "trainNumber": "8763",
-        "departureTime": "18:40:00",
-        "arrivalTime": "19:06:00",
-        "routeId": "44077",
-        "days": [
-          2
-        ]
-      },
-      {
         "trainNumber": "765",
         "departureTime": "18:56:00",
         "arrivalTime": "19:22:00",
@@ -10138,5 +10066,5 @@
       }
     ]
   },
-  "version": "0.5.2"
+  "version": "0.5.3"
 }
