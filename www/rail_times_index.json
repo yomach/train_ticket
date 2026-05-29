@@ -1,9 +1,9 @@
 {
   "generatedFrom": "gtfs.zip",
-  "generatedAt": "2026-05-27T07:56:02.414Z",
+  "generatedAt": "2026-05-29T07:46:17.914Z",
   "agencyId": "2",
   "serviceMode": "all-days",
-  "serviceCount": 39632,
+  "serviceCount": 39337,
   "stationCount": 66,
   "pairCount": 16,
   "stations": [
@@ -4824,15 +4824,6 @@
         ]
       },
       {
-        "trainNumber": "9700",
-        "departureTime": "00:32:00",
-        "arrivalTime": "01:17:00",
-        "routeId": "44076",
-        "days": [
-          3
-        ]
-      },
-      {
         "trainNumber": "6702",
         "departureTime": "01:32:00",
         "arrivalTime": "02:17:00",
@@ -6178,15 +6169,6 @@
           1,
           2,
           4
-        ]
-      },
-      {
-        "trainNumber": "9700",
-        "departureTime": "00:32:00",
-        "arrivalTime": "01:07:00",
-        "routeId": "44076",
-        "days": [
-          3
         ]
       },
       {
@@ -8621,15 +8603,6 @@
         ]
       },
       {
-        "trainNumber": "9700",
-        "departureTime": "00:32:00",
-        "arrivalTime": "00:53:00",
-        "routeId": "44076",
-        "days": [
-          3
-        ]
-      },
-      {
         "trainNumber": "6702",
         "departureTime": "01:32:00",
         "arrivalTime": "01:53:00",
@@ -10066,5 +10039,5 @@
       }
     ]
   },
-  "version": "0.5.3"
+  "version": "0.5.4"
 }
