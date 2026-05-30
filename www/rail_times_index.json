@@ -1,9 +1,9 @@
 {
   "generatedFrom": "gtfs.zip",
-  "generatedAt": "2026-05-29T07:46:17.914Z",
+  "generatedAt": "2026-05-30T06:40:10.712Z",
   "agencyId": "2",
   "serviceMode": "all-days",
-  "serviceCount": 39337,
+  "serviceCount": 39304,
   "stationCount": 66,
   "pairCount": 16,
   "stations": [
@@ -288,19 +288,6 @@
         ]
       },
       {
-        "trainNumber": "545",
-        "departureTime": "06:43:00",
-        "arrivalTime": "07:05:00",
-        "routeId": "41680",
-        "days": [
-          0,
-          1,
-          2,
-          3,
-          4
-        ]
-      },
-      {
         "trainNumber": "6543",
         "departureTime": "06:49:00",
         "arrivalTime": "07:10:00",
@@ -323,19 +310,6 @@
         ]
       },
       {
-        "trainNumber": "549",
-        "departureTime": "07:43:00",
-        "arrivalTime": "08:05:00",
-        "routeId": "34186",
-        "days": [
-          0,
-          1,
-          2,
-          3,
-          4
-        ]
-      },
-      {
         "trainNumber": "6545",
         "departureTime": "07:49:00",
         "arrivalTime": "08:10:00",
@@ -349,19 +323,6 @@
         "departureTime": "08:13:00",
         "arrivalTime": "08:35:00",
         "routeId": "32438",
-        "days": [
-          0,
-          1,
-          2,
-          3,
-          4
-        ]
-      },
-      {
-        "trainNumber": "553",
-        "departureTime": "08:43:00",
-        "arrivalTime": "09:05:00",
-        "routeId": "34188",
         "days": [
           0,
           1,
@@ -525,19 +486,6 @@
         ]
       },
       {
-        "trainNumber": "575",
-        "departureTime": "15:43:00",
-        "arrivalTime": "16:05:00",
-        "routeId": "34190",
-        "days": [
-          0,
-          1,
-          2,
-          3,
-          4
-        ]
-      },
-      {
         "trainNumber": "6561",
         "departureTime": "15:49:00",
         "arrivalTime": "16:10:00",
@@ -569,19 +517,6 @@
         ]
       },
       {
-        "trainNumber": "579",
-        "departureTime": "16:43:00",
-        "arrivalTime": "17:05:00",
-        "routeId": "34192",
-        "days": [
-          0,
-          1,
-          2,
-          3,
-          4
-        ]
-      },
-      {
         "trainNumber": "581",
         "departureTime": "17:13:00",
         "arrivalTime": "17:35:00",
@@ -595,36 +530,10 @@
         ]
       },
       {
-        "trainNumber": "583",
-        "departureTime": "17:43:00",
-        "arrivalTime": "18:05:00",
-        "routeId": "34194",
-        "days": [
-          0,
-          1,
-          2,
-          3,
-          4
-        ]
-      },
-      {
         "trainNumber": "585",
         "departureTime": "18:13:00",
         "arrivalTime": "18:35:00",
         "routeId": "32458",
-        "days": [
-          0,
-          1,
-          2,
-          3,
-          4
-        ]
-      },
-      {
-        "trainNumber": "587",
-        "departureTime": "18:43:00",
-        "arrivalTime": "19:05:00",
-        "routeId": "34196",
         "days": [
           0,
           1,
@@ -2757,19 +2666,6 @@
         ]
       },
       {
-        "trainNumber": "545",
-        "departureTime": "06:36:00",
-        "arrivalTime": "07:05:00",
-        "routeId": "41680",
-        "days": [
-          0,
-          1,
-          2,
-          3,
-          4
-        ]
-      },
-      {
         "trainNumber": "6543",
         "departureTime": "06:43:00",
         "arrivalTime": "07:10:00",
@@ -2792,19 +2688,6 @@
         ]
       },
       {
-        "trainNumber": "549",
-        "departureTime": "07:36:00",
-        "arrivalTime": "08:05:00",
-        "routeId": "34186",
-        "days": [
-          0,
-          1,
-          2,
-          3,
-          4
-        ]
-      },
-      {
         "trainNumber": "6545",
         "departureTime": "07:43:00",
         "arrivalTime": "08:10:00",
@@ -2818,19 +2701,6 @@
         "departureTime": "08:06:00",
         "arrivalTime": "08:35:00",
         "routeId": "32438",
-        "days": [
-          0,
-          1,
-          2,
-          3,
-          4
-        ]
-      },
-      {
-        "trainNumber": "553",
-        "departureTime": "08:36:00",
-        "arrivalTime": "09:05:00",
-        "routeId": "34188",
         "days": [
           0,
           1,
@@ -2994,19 +2864,6 @@
         ]
       },
       {
-        "trainNumber": "575",
-        "departureTime": "15:36:00",
-        "arrivalTime": "16:05:00",
-        "routeId": "34190",
-        "days": [
-          0,
-          1,
-          2,
-          3,
-          4
-        ]
-      },
-      {
         "trainNumber": "6561",
         "departureTime": "15:43:00",
         "arrivalTime": "16:10:00",
@@ -3038,19 +2895,6 @@
         ]
       },
       {
-        "trainNumber": "579",
-        "departureTime": "16:36:00",
-        "arrivalTime": "17:05:00",
-        "routeId": "34192",
-        "days": [
-          0,
-          1,
-          2,
-          3,
-          4
-        ]
-      },
-      {
         "trainNumber": "581",
         "departureTime": "17:06:00",
         "arrivalTime": "17:35:00",
@@ -3064,36 +2908,10 @@
         ]
       },
       {
-        "trainNumber": "583",
-        "departureTime": "17:36:00",
-        "arrivalTime": "18:05:00",
-        "routeId": "34194",
-        "days": [
-          0,
-          1,
-          2,
-          3,
-          4
-        ]
-      },
-      {
         "trainNumber": "585",
         "departureTime": "18:06:00",
         "arrivalTime": "18:35:00",
         "routeId": "32458",
-        "days": [
-          0,
-          1,
-          2,
-          3,
-          4
-        ]
-      },
-      {
-        "trainNumber": "587",
-        "departureTime": "18:36:00",
-        "arrivalTime": "19:05:00",
-        "routeId": "34196",
         "days": [
           0,
           1,
@@ -4407,19 +4225,6 @@
         ]
       },
       {
-        "trainNumber": "544",
-        "departureTime": "06:29:00",
-        "arrivalTime": "06:49:00",
-        "routeId": "41679",
-        "days": [
-          0,
-          1,
-          2,
-          3,
-          4
-        ]
-      },
-      {
         "trainNumber": "546",
         "departureTime": "06:59:00",
         "arrivalTime": "07:16:00",
@@ -4442,19 +4247,6 @@
         ]
       },
       {
-        "trainNumber": "548",
-        "departureTime": "07:29:00",
-        "arrivalTime": "07:49:00",
-        "routeId": "34185",
-        "days": [
-          0,
-          1,
-          2,
-          3,
-          4
-        ]
-      },
-      {
         "trainNumber": "550",
         "departureTime": "07:59:00",
         "arrivalTime": "08:16:00",
@@ -4474,19 +4266,6 @@
         "routeId": "32484",
         "days": [
           5
-        ]
-      },
-      {
-        "trainNumber": "552",
-        "departureTime": "08:29:00",
-        "arrivalTime": "08:49:00",
-        "routeId": "34187",
-        "days": [
-          0,
-          1,
-          2,
-          3,
-          4
         ]
       },
       {
@@ -4644,19 +4423,6 @@
         ]
       },
       {
-        "trainNumber": "574",
-        "departureTime": "15:29:00",
-        "arrivalTime": "15:49:00",
-        "routeId": "34189",
-        "days": [
-          0,
-          1,
-          2,
-          3,
-          4
-        ]
-      },
-      {
         "trainNumber": "576",
         "departureTime": "15:59:00",
         "arrivalTime": "16:16:00",
@@ -4679,19 +4445,6 @@
         ]
       },
       {
-        "trainNumber": "578",
-        "departureTime": "16:29:00",
-        "arrivalTime": "16:49:00",
-        "routeId": "34191",
-        "days": [
-          0,
-          1,
-          2,
-          3,
-          4
-        ]
-      },
-      {
         "trainNumber": "580",
         "departureTime": "16:59:00",
         "arrivalTime": "17:16:00",
@@ -4705,36 +4458,10 @@
         ]
       },
       {
-        "trainNumber": "582",
-        "departureTime": "17:29:00",
-        "arrivalTime": "17:49:00",
-        "routeId": "34193",
-        "days": [
-          0,
-          1,
-          2,
-          3,
-          4
-        ]
-      },
-      {
         "trainNumber": "584",
         "departureTime": "17:59:00",
         "arrivalTime": "18:16:00",
         "routeId": "32457",
-        "days": [
-          0,
-          1,
-          2,
-          3,
-          4
-        ]
-      },
-      {
-        "trainNumber": "586",
-        "departureTime": "18:29:00",
-        "arrivalTime": "18:49:00",
-        "routeId": "34195",
         "days": [
           0,
           1,
@@ -6908,19 +6635,6 @@
         ]
       },
       {
-        "trainNumber": "544",
-        "departureTime": "06:29:00",
-        "arrivalTime": "06:57:00",
-        "routeId": "41679",
-        "days": [
-          0,
-          1,
-          2,
-          3,
-          4
-        ]
-      },
-      {
         "trainNumber": "546",
         "departureTime": "06:59:00",
         "arrivalTime": "07:24:00",
@@ -6943,19 +6657,6 @@
         ]
       },
       {
-        "trainNumber": "548",
-        "departureTime": "07:29:00",
-        "arrivalTime": "07:57:00",
-        "routeId": "34185",
-        "days": [
-          0,
-          1,
-          2,
-          3,
-          4
-        ]
-      },
-      {
         "trainNumber": "550",
         "departureTime": "07:59:00",
         "arrivalTime": "08:24:00",
@@ -6975,19 +6676,6 @@
         "routeId": "32484",
         "days": [
           5
-        ]
-      },
-      {
-        "trainNumber": "552",
-        "departureTime": "08:29:00",
-        "arrivalTime": "08:57:00",
-        "routeId": "34187",
-        "days": [
-          0,
-          1,
-          2,
-          3,
-          4
         ]
       },
       {
@@ -7145,19 +6833,6 @@
         ]
       },
       {
-        "trainNumber": "574",
-        "departureTime": "15:29:00",
-        "arrivalTime": "15:57:00",
-        "routeId": "34189",
-        "days": [
-          0,
-          1,
-          2,
-          3,
-          4
-        ]
-      },
-      {
         "trainNumber": "576",
         "departureTime": "15:59:00",
         "arrivalTime": "16:24:00",
@@ -7180,19 +6855,6 @@
         ]
       },
       {
-        "trainNumber": "578",
-        "departureTime": "16:29:00",
-        "arrivalTime": "16:57:00",
-        "routeId": "34191",
-        "days": [
-          0,
-          1,
-          2,
-          3,
-          4
-        ]
-      },
-      {
         "trainNumber": "580",
         "departureTime": "16:59:00",
         "arrivalTime": "17:24:00",
@@ -7206,36 +6868,10 @@
         ]
       },
       {
-        "trainNumber": "582",
-        "departureTime": "17:29:00",
-        "arrivalTime": "17:57:00",
-        "routeId": "34193",
-        "days": [
-          0,
-          1,
-          2,
-          3,
-          4
-        ]
-      },
-      {
         "trainNumber": "584",
         "departureTime": "17:59:00",
         "arrivalTime": "18:24:00",
         "routeId": "32457",
-        "days": [
-          0,
-          1,
-          2,
-          3,
-          4
-        ]
-      },
-      {
-        "trainNumber": "586",
-        "departureTime": "18:29:00",
-        "arrivalTime": "18:57:00",
-        "routeId": "34195",
         "days": [
           0,
           1,
@@ -10039,5 +9675,5 @@
       }
     ]
   },
-  "version": "0.5.4"
+  "version": "0.5.5"
 }
