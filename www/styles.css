@@ -247,6 +247,11 @@ select {
   cursor: pointer;
 }
 
+.warning-text {
+  color: #d32f2f;
+  font-weight: 600;
+}
+
 .success-text {
   color: #1a7f44;
   font-weight: 600;
