@@ -51,9 +51,9 @@
     return Number.isInteger(n) && n >= 1 && n <= 50 ? n : null;
   }
 
-  // Pull originPlatform/destPlatform for `trainNumber` out of a searchTrain
-  // response. Returns null if not found or both platforms are unusable.
-  function extractPlatforms(data, trainNumber) {
+  // Extract details for `trainNumber` out of a searchTrain
+  // response. Returns `{ found: boolean, originPlatform, destPlatform, delayMinutes }`
+  function extractTrainDetails(data, trainNumber) {
     const travels = Array.isArray(data?.result?.travels) ? data.result.travels : [];
     for (const travel of travels) {
       const trains = Array.isArray(travel?.trains) ? travel.trains : [];
@@ -61,11 +61,21 @@
         if (String(train?.trainNumber) !== String(trainNumber)) continue;
         const origin = sanitizePlatform(train.originPlatform);
         const dest = sanitizePlatform(train.destPlatform);
-        if (origin == null && dest == null) return null;
-        return { originPlatform: origin, destPlatform: dest };
+        
+        let delayMinutes = 0;
+        if (Array.isArray(train.etaDiffTimes)) {
+          for (const eta of train.etaDiffTimes) {
+            const dif = Number(eta.difMin);
+            if (!Number.isNaN(dif) && dif > delayMinutes) {
+              delayMinutes = dif;
+            }
+          }
+        }
+        
+        return { found: true, originPlatform: origin, destPlatform: dest, delayMinutes };
       }
     }
-    return null;
+    return { found: false };
   }
 
   // Fingerprint a trip so we can detect stale pre-fetch promises if the user
@@ -75,7 +85,7 @@
     return `${p.fromStation}|${p.toStation}|${p.date}|${p.time}|${p.trainNumber}`;
   }
 
-  const api = { isValidScheduleShape, sanitizePlatform, extractPlatforms, tripKey, TIME_PATTERN };
+  const api = { isValidScheduleShape, sanitizePlatform, extractTrainDetails, tripKey, TIME_PATTERN };
 
   if (typeof module !== "undefined" && module.exports) {
     module.exports = api;

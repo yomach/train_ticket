@@ -1,7 +1,7 @@
 const test = require("node:test");
 const assert = require("node:assert/strict");
 
-const { isValidScheduleShape, sanitizePlatform, extractPlatforms, tripKey } =
+const { isValidScheduleShape, sanitizePlatform, extractTrainDetails, tripKey } =
   require("../www/schedule-helpers.js");
 
 // Minimal valid schedule meeting the sanity-floor counts.
@@ -82,47 +82,47 @@ test("sanitizePlatform rejects out-of-range, non-integer, and garbage", () => {
   assert.equal(sanitizePlatform({}), null);
 });
 
-test("extractPlatforms finds the train by exact number match", () => {
+test("extractTrainDetails finds the train by exact number match and extracts delay", () => {
   const data = {
     result: {
       travels: [
-        { trains: [{ trainNumber: 542, originPlatform: 3, destPlatform: 2 }] },
+        { trains: [{ trainNumber: 542, originPlatform: 3, destPlatform: 2, etaDiffTimes: [{ difMin: 5 }] }] },
       ],
     },
   };
-  assert.deepEqual(extractPlatforms(data, "542"), { originPlatform: 3, destPlatform: 2 });
+  assert.deepEqual(extractTrainDetails(data, "542"), { found: true, originPlatform: 3, destPlatform: 2, delayMinutes: 5 });
   // string-vs-number trainNumber should still match
-  assert.deepEqual(extractPlatforms(data, 542), { originPlatform: 3, destPlatform: 2 });
+  assert.deepEqual(extractTrainDetails(data, 542), { found: true, originPlatform: 3, destPlatform: 2, delayMinutes: 5 });
 });
 
-test("extractPlatforms returns null when no train matches", () => {
+test("extractTrainDetails returns found: false when no train matches", () => {
   const data = {
     result: { travels: [{ trains: [{ trainNumber: 999, originPlatform: 3, destPlatform: 2 }] }] },
   };
-  assert.equal(extractPlatforms(data, "542"), null);
+  assert.deepEqual(extractTrainDetails(data, "542"), { found: false });
 });
 
-test("extractPlatforms handles missing/malformed shapes gracefully", () => {
-  assert.equal(extractPlatforms(null, "542"), null);
-  assert.equal(extractPlatforms({}, "542"), null);
-  assert.equal(extractPlatforms({ result: {} }, "542"), null);
-  assert.equal(extractPlatforms({ result: { travels: "nope" } }, "542"), null);
-  assert.equal(extractPlatforms({ result: { travels: [{}] } }, "542"), null);
-  assert.equal(extractPlatforms({ result: { travels: [{ trains: "nope" }] } }, "542"), null);
+test("extractTrainDetails handles missing/malformed shapes gracefully", () => {
+  assert.deepEqual(extractTrainDetails(null, "542"), { found: false });
+  assert.deepEqual(extractTrainDetails({}, "542"), { found: false });
+  assert.deepEqual(extractTrainDetails({ result: {} }, "542"), { found: false });
+  assert.deepEqual(extractTrainDetails({ result: { travels: "nope" } }, "542"), { found: false });
+  assert.deepEqual(extractTrainDetails({ result: { travels: [{}] } }, "542"), { found: false });
+  assert.deepEqual(extractTrainDetails({ result: { travels: [{ trains: "nope" }] } }, "542"), { found: false });
 });
 
-test("extractPlatforms returns null when platforms are out of range", () => {
+test("extractTrainDetails returns null for platforms when they are out of range", () => {
   const data = {
     result: { travels: [{ trains: [{ trainNumber: 542, originPlatform: 99, destPlatform: -1 }] }] },
   };
-  assert.equal(extractPlatforms(data, "542"), null);
+  assert.deepEqual(extractTrainDetails(data, "542"), { found: true, originPlatform: null, destPlatform: null, delayMinutes: 0 });
 });
 
-test("extractPlatforms returns partial info when one platform is valid", () => {
+test("extractTrainDetails returns partial info when one platform is valid", () => {
   const data = {
     result: { travels: [{ trains: [{ trainNumber: 542, originPlatform: 99, destPlatform: 2 }] }] },
   };
-  assert.deepEqual(extractPlatforms(data, "542"), { originPlatform: null, destPlatform: 2 });
+  assert.deepEqual(extractTrainDetails(data, "542"), { found: true, originPlatform: null, destPlatform: 2, delayMinutes: 0 });
 });
 
 test("tripKey is deterministic and uses all booking-identity fields", () => {
