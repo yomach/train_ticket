@@ -79,7 +79,7 @@ if (!window.ScheduleHelpers) {
   document.getElementById("statusText")?.replaceChildren("שגיאה בטעינת מודול העזר.");
   throw new Error("ScheduleHelpers script failed to load");
 }
-const { isValidScheduleShape, sanitizePlatform, extractPlatforms, tripKey } = window.ScheduleHelpers;
+const { isValidScheduleShape, sanitizePlatform, extractTrainDetails, tripKey } = window.ScheduleHelpers;
 
 const elements = {
   directionGroup: document.getElementById("directionGroup"),
