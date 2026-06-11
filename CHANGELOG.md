@@ -4,6 +4,23 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.6.1] - 2026-06-10
+
+### Changed
+- **Schedule Refresh.** Updated train schedule.
+
+
+## [0.6.0] - 2026-06-06
+
+### Added
+- Added a "Show QR Code" toggle button to save screen real-estate.
+- Added loading indicators to the booking process.
+- Added warnings for potentially canceled trains (no real-time data found).
+- Added real-time delay minutes to the platform info text.
+
+### Changed
+- Replaced the large barcode container with a QR code toggle.
+
 ## [0.5.6] - 2026-06-04
 
 ### Changed

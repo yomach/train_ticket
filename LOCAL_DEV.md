@@ -188,7 +188,7 @@ The general rule: anything that only exists to make `wrangler dev`
 |---|---|
 | `www/app.js` | All FE logic: form state, OTP flow, cookies, `apiPost`, native vs browser branch, `searchTrain` pre-fetch, background schedule refresh |
 | `www/booking-helpers.js` | URL builder + redirect-fallback heuristic, exposed for tests |
-| `www/schedule-helpers.js` | Pure validators / extractors (`isValidScheduleShape`, `sanitizePlatform`, `extractPlatforms`, `tripKey`) — shared by app + Node tests |
+| `www/schedule-helpers.js` | Pure validators / extractors (`isValidScheduleShape`, `sanitizePlatform`, `extractTrainDetails`, `tripKey`) — shared by app + Node tests |
 | `www/version-helpers.js` | Semver comparators (`compareVersions`, `isSignificantUpdate`) used to conditionally show update popups. |
 | `www/index.html` | Three steps: form → OTP → result (result includes trip summary + platform line) |
 | `www/rail_times_index.json` | GTFS index of valid trips. Rebuilt daily by CI |
@@ -201,7 +201,7 @@ The general rule: anything that only exists to make `wrangler dev`
 | `android/` | Capacitor-generated Android Studio project. Debug builds get `applicationIdSuffix ".debug"` so they install alongside release |
 | `tests/booking-helpers.test.js` | Tests `buildReservationUrl` + redirect heuristic |
 | `tests/worker-health.test.js` | Tests the worker's `GET /` status page (and that non-root GETs are proxied) |
-| `tests/schedule-helpers.test.js` | Tests `isValidScheduleShape` / `sanitizePlatform` / `extractPlatforms` / `tripKey`; live-validates bundled `rail_times_index.json` |
+| `tests/schedule-helpers.test.js` | Tests `isValidScheduleShape` / `sanitizePlatform` / `extractTrainDetails` / `tripKey`; live-validates bundled `rail_times_index.json` |
 
 ## Conventions
 

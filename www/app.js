@@ -79,7 +79,7 @@ if (!window.ScheduleHelpers) {
   document.getElementById("statusText")?.replaceChildren("שגיאה בטעינת מודול העזר.");
   throw new Error("ScheduleHelpers script failed to load");
 }
-const { isValidScheduleShape, sanitizePlatform, extractPlatforms, tripKey } = window.ScheduleHelpers;
+const { isValidScheduleShape, sanitizePlatform, extractTrainDetails, tripKey } = window.ScheduleHelpers;
 
 const elements = {
   directionGroup: document.getElementById("directionGroup"),
@@ -109,6 +109,8 @@ const elements = {
   platformInfo: document.getElementById("platformInfo"),
   qrcode: document.getElementById("qrcode"),
   resetBtn: document.getElementById("resetBtn"),
+  showQrBtn: document.getElementById("showQrBtn"),
+  barcodeWrap: document.getElementById("barcodeWrap"),
   // about
   aboutBtn: document.getElementById("aboutBtn"),
   aboutModal: document.getElementById("aboutModal"),
@@ -133,7 +135,7 @@ const elements = {
   autoUpdateSchedule: document.getElementById("autoUpdateSchedule"),
 };
 
-const VERSION = "0.5.6";
+const VERSION = "0.6.1";
 
 // ── Step navigation ──────────────────────────────────────────────────────────
 
@@ -519,16 +521,16 @@ async function fetchPlatformInfo({ fromStation, toStation, date, time, trainNumb
       });
       if (!res.ok) {
         if (res.status >= 500 && attempt === 0) continue;
-        return null;
+        return { error: true };
       }
       const data = await res.json();
-      return extractPlatforms(data, trainNumber);
+      return extractTrainDetails(data, trainNumber);
     } catch (e) {
       if (attempt === 0 && /Abort|Network|fetch/i.test(String(e?.message))) continue;
-      return null;
+      return { error: true };
     }
   }
-  return null;
+  return { error: true };
 }
 
 function redirectToOfficialBooking(params, statusElement) {
@@ -719,6 +721,9 @@ function renderPlatformLine(info) {
       lines.push(`ירידה ברציף ${info.destPlatform}`);
     }
   }
+  if (info?.delayMinutes > 0) {
+    lines.push(`איחור משוער של ${info.delayMinutes} דק'`);
+  }
   if (lines.length) {
     elements.platformInfo.textContent = lines.join(" • ");
     elements.platformInfo.classList.remove("hidden");
@@ -743,8 +748,9 @@ async function showResult(resultId) {
   renderTripSummary();
 
   if (elements.platformInfo) {
-    elements.platformInfo.classList.add("hidden");
-    elements.platformInfo.textContent = "";
+    elements.platformInfo.classList.remove("hidden");
+    elements.platformInfo.classList.remove("warning-text");
+    elements.platformInfo.textContent = "טוען נתוני רציף וזמנים...";
   }
 
   showStep("result");
@@ -758,11 +764,21 @@ async function showResult(resultId) {
   try {
     info = await promise;
   } catch {
-    return;
+    info = { error: true };
   }
   // User may have started a new booking while we awaited.
   if (!info || state.platformInfoTripKey !== expectedKey) return;
   if (state.step !== "result") return;
+
+  if (info.error) {
+    elements.platformInfo.textContent = "לא ניתן לטעון נתוני זמן אמת כעת.";
+    return;
+  }
+  if (!info.found) {
+    elements.platformInfo.classList.add("warning-text");
+    elements.platformInfo.textContent = "שימו לב: ייתכן ורכבת זו בוטלה. מומלץ לבדוק באפליקציית רכבת ישראל.";
+    return;
+  }
 
   renderPlatformLine(info);
 }
@@ -770,6 +786,8 @@ async function showResult(resultId) {
 function handleReset() {
   showStep("form");
   elements.statusText.textContent = "";
+  elements.barcodeWrap.classList.add("hidden");
+  elements.showQrBtn.textContent = "הצג ברקוד";
   state.platformInfoPromise = null;
   state.platformInfoTripKey = "";
 }
@@ -993,6 +1011,10 @@ function registerEvents() {
   elements.otpConfirmBtn.addEventListener("click", handleOtpConfirm);
   elements.otpBackBtn.addEventListener("click", () => showStep("form"));
   elements.resetBtn.addEventListener("click", handleReset);
+  elements.showQrBtn.addEventListener("click", () => {
+    elements.barcodeWrap.classList.toggle("hidden");
+    elements.showQrBtn.textContent = elements.barcodeWrap.classList.contains("hidden") ? "הצג ברקוד" : "הסתר ברקוד";
+  });
   elements.aboutBtn.addEventListener("click", () => showAbout(true));
   elements.closeAboutBtn.addEventListener("click", () => showAbout(false));
   elements.aboutModal.addEventListener("click", (e) => {
