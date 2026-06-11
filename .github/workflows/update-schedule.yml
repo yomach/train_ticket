@@ -162,6 +162,7 @@ jobs:
         if: steps.changes.outputs.changed == 'true' && github.event_name != 'pull_request'
         uses: peter-evans/create-pull-request@v8.1.1
         with:
+          token: ${{ secrets.PAT }}
           branch: chore/refresh-rail-schedule
           base: main
           commit-message: "chore: refresh rail schedule to v${{ env.NEW_VERSION }}"
