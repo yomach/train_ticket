@@ -38,24 +38,43 @@ jobs:
         run: |
           set -euo pipefail
           success=0
-          for i in {1..3}; do
-            echo "Attempt $i to download GTFS..."
-            rm -f /tmp/gtfs.zip
-            if curl -fL --retry 2 --retry-all-errors --retry-delay 5 --max-time 600 \
-              -A "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36" \
-              -o /tmp/gtfs.zip \
-              https://gtfs.mot.gov.il/gtfsfiles/israel-public-transportation.zip; then
-              
-              if unzip -t /tmp/gtfs.zip >/dev/null 2>&1; then
-                success=1
-                break
-              else
-                echo "Downloaded file is not a valid ZIP archive (possibly a WAF block page)."
-              fi
+          
+          # Try Hasadna community mirror first (bypasses MOT WAF)
+          echo "Trying Hasadna OpenBus S3 mirror..."
+          TODAY=$(date -u +%Y/%m/%d)
+          YESTERDAY=$(date -u -d "yesterday" +%Y/%m/%d)
+          
+          for DATE in "$TODAY" "$YESTERDAY"; do
+            URL="https://openbus-stride-public.s3.eu-west-1.amazonaws.com/gtfs_archive/$DATE/israel-public-transportation.zip"
+            echo "Fetching $URL"
+            if curl -fL --retry 2 -o /tmp/gtfs.zip "$URL" && unzip -t /tmp/gtfs.zip >/dev/null 2>&1; then
+              echo "Successfully downloaded from mirror."
+              success=1
+              break
             fi
-            echo "Download or verification failed. Waiting 30 seconds before retry..."
-            sleep 30
           done
+          
+          if [ "$success" -eq 0 ]; then
+            echo "Mirror failed. Falling back to official MOT server..."
+            for i in {1..2}; do
+              echo "Attempt $i to download official GTFS..."
+              rm -f /tmp/gtfs.zip
+              if curl -fL --retry 2 --retry-all-errors --retry-delay 5 --max-time 600 \
+                -A "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36" \
+                -o /tmp/gtfs.zip \
+                https://gtfs.mot.gov.il/gtfsfiles/israel-public-transportation.zip; then
+                
+                if unzip -t /tmp/gtfs.zip >/dev/null 2>&1; then
+                  success=1
+                  break
+                else
+                  echo "Downloaded file is not a valid ZIP archive (possibly a WAF block page)."
+                fi
+              fi
+              echo "Download or verification failed. Waiting 30 seconds before retry..."
+              sleep 30
+            done
+          fi
           
           if [ "$success" -eq 0 ]; then
             echo "Failed to download a valid GTFS zip."
