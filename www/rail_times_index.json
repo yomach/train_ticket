@@ -1,9 +1,9 @@
 {
   "generatedFrom": "gtfs.zip",
-  "generatedAt": "2026-07-01T08:02:12.203Z",
+  "generatedAt": "2026-08-18T04:25:11.030Z",
   "agencyId": "2",
   "serviceMode": "all-days",
-  "serviceCount": 25289,
+  "serviceCount": 30786,
   "stationCount": 66,
   "pairCount": 16,
   "stations": [
@@ -280,7 +280,11 @@
         "arrivalTime": "06:35:00",
         "routeId": "32434",
         "days": [
-          0
+          0,
+          1,
+          2,
+          3,
+          4
         ]
       },
       {
@@ -2667,7 +2671,11 @@
         "arrivalTime": "06:35:00",
         "routeId": "32434",
         "days": [
-          0
+          0,
+          1,
+          2,
+          3,
+          4
         ]
       },
       {
@@ -9745,5 +9753,5 @@
       }
     ]
   },
-  "version": "0.6.2"
+  "version": "0.6.3"
 }
