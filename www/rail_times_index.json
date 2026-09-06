@@ -1,9 +1,9 @@
 {
   "generatedFrom": "gtfs.zip",
-  "generatedAt": "2026-09-02T08:13:24.666Z",
+  "generatedAt": "2026-09-06T08:12:29.422Z",
   "agencyId": "2",
   "serviceMode": "all-days",
-  "serviceCount": 48497,
+  "serviceCount": 60264,
   "stationCount": 66,
   "pairCount": 16,
   "stations": [
@@ -508,15 +508,6 @@
         ]
       },
       {
-        "trainNumber": "6561",
-        "departureTime": "15:49:00",
-        "arrivalTime": "16:10:00",
-        "routeId": "38501",
-        "days": [
-          5
-        ]
-      },
-      {
         "trainNumber": "577",
         "departureTime": "16:13:00",
         "arrivalTime": "16:35:00",
@@ -527,15 +518,6 @@
           2,
           3,
           4
-        ]
-      },
-      {
-        "trainNumber": "6563",
-        "departureTime": "16:39:00",
-        "arrivalTime": "17:00:00",
-        "routeId": "43540",
-        "days": [
-          5
         ]
       },
       {
@@ -609,27 +591,9 @@
         ]
       },
       {
-        "trainNumber": "7545",
-        "departureTime": "22:48:00",
-        "arrivalTime": "23:09:00",
-        "routeId": "32526",
-        "days": [
-          6
-        ]
-      },
-      {
         "trainNumber": "7547",
         "departureTime": "23:47:00",
         "arrivalTime": "24:08:00",
-        "routeId": "38560",
-        "days": [
-          6
-        ]
-      },
-      {
-        "trainNumber": "7547",
-        "departureTime": "23:48:00",
-        "arrivalTime": "24:09:00",
         "routeId": "38560",
         "days": [
           6
@@ -1102,15 +1066,6 @@
         ]
       },
       {
-        "trainNumber": "6755",
-        "departureTime": "15:24:00",
-        "arrivalTime": "16:22:00",
-        "routeId": "38512",
-        "days": [
-          5
-        ]
-      },
-      {
         "trainNumber": "753",
         "departureTime": "15:24:00",
         "arrivalTime": "16:22:00",
@@ -1121,15 +1076,6 @@
           2,
           3,
           4
-        ]
-      },
-      {
-        "trainNumber": "6759",
-        "departureTime": "15:54:00",
-        "arrivalTime": "16:52:00",
-        "routeId": "38514",
-        "days": [
-          5
         ]
       },
       {
@@ -1307,15 +1253,6 @@
         ]
       },
       {
-        "trainNumber": "7719",
-        "departureTime": "21:30:00",
-        "arrivalTime": "22:22:00",
-        "routeId": "30559",
-        "days": [
-          6
-        ]
-      },
-      {
         "trainNumber": "779",
         "departureTime": "21:59:00",
         "arrivalTime": "22:59:00",
@@ -1326,15 +1263,6 @@
           2,
           3,
           4
-        ]
-      },
-      {
-        "trainNumber": "7721",
-        "departureTime": "22:24:00",
-        "arrivalTime": "23:22:00",
-        "routeId": "30561",
-        "days": [
-          6
         ]
       },
       {
@@ -1370,15 +1298,6 @@
           2,
           3,
           4
-        ]
-      },
-      {
-        "trainNumber": "7723",
-        "departureTime": "23:24:00",
-        "arrivalTime": "24:22:00",
-        "routeId": "34627",
-        "days": [
-          6
         ]
       },
       {
@@ -1765,15 +1684,6 @@
         ]
       },
       {
-        "trainNumber": "6755",
-        "departureTime": "15:30:00",
-        "arrivalTime": "16:22:00",
-        "routeId": "38512",
-        "days": [
-          5
-        ]
-      },
-      {
         "trainNumber": "753",
         "departureTime": "15:30:00",
         "arrivalTime": "16:22:00",
@@ -1784,15 +1694,6 @@
           2,
           3,
           4
-        ]
-      },
-      {
-        "trainNumber": "6759",
-        "departureTime": "16:00:00",
-        "arrivalTime": "16:52:00",
-        "routeId": "38514",
-        "days": [
-          5
         ]
       },
       {
@@ -1957,15 +1858,6 @@
         ]
       },
       {
-        "trainNumber": "7719",
-        "departureTime": "21:35:00",
-        "arrivalTime": "22:22:00",
-        "routeId": "30559",
-        "days": [
-          6
-        ]
-      },
-      {
         "trainNumber": "777",
         "departureTime": "21:36:00",
         "arrivalTime": "22:29:00",
@@ -1989,15 +1881,6 @@
           2,
           3,
           4
-        ]
-      },
-      {
-        "trainNumber": "7721",
-        "departureTime": "22:30:00",
-        "arrivalTime": "23:22:00",
-        "routeId": "30561",
-        "days": [
-          6
         ]
       },
       {
@@ -2033,15 +1916,6 @@
           2,
           3,
           4
-        ]
-      },
-      {
-        "trainNumber": "7723",
-        "departureTime": "23:30:00",
-        "arrivalTime": "24:22:00",
-        "routeId": "34627",
-        "days": [
-          6
         ]
       },
       {
@@ -2533,15 +2407,6 @@
         ]
       },
       {
-        "trainNumber": "6755",
-        "departureTime": "15:35:00",
-        "arrivalTime": "16:22:00",
-        "routeId": "38512",
-        "days": [
-          5
-        ]
-      },
-      {
         "trainNumber": "753",
         "departureTime": "15:35:00",
         "arrivalTime": "16:22:00",
@@ -2552,15 +2417,6 @@
           2,
           3,
           4
-        ]
-      },
-      {
-        "trainNumber": "6759",
-        "departureTime": "16:05:00",
-        "arrivalTime": "16:52:00",
-        "routeId": "38514",
-        "days": [
-          5
         ]
       },
       {
@@ -2725,15 +2581,6 @@
         ]
       },
       {
-        "trainNumber": "7719",
-        "departureTime": "21:39:00",
-        "arrivalTime": "22:22:00",
-        "routeId": "30559",
-        "days": [
-          6
-        ]
-      },
-      {
         "trainNumber": "777",
         "departureTime": "21:41:00",
         "arrivalTime": "22:29:00",
@@ -2757,15 +2604,6 @@
           2,
           3,
           4
-        ]
-      },
-      {
-        "trainNumber": "7721",
-        "departureTime": "22:35:00",
-        "arrivalTime": "23:22:00",
-        "routeId": "30561",
-        "days": [
-          6
         ]
       },
       {
@@ -2801,15 +2639,6 @@
           2,
           3,
           4
-        ]
-      },
-      {
-        "trainNumber": "7723",
-        "departureTime": "23:35:00",
-        "arrivalTime": "24:22:00",
-        "routeId": "34627",
-        "days": [
-          6
         ]
       },
       {
@@ -3070,15 +2899,6 @@
         ]
       },
       {
-        "trainNumber": "6561",
-        "departureTime": "15:43:00",
-        "arrivalTime": "16:10:00",
-        "routeId": "38501",
-        "days": [
-          5
-        ]
-      },
-      {
         "trainNumber": "577",
         "departureTime": "16:06:00",
         "arrivalTime": "16:35:00",
@@ -3089,15 +2909,6 @@
           2,
           3,
           4
-        ]
-      },
-      {
-        "trainNumber": "6563",
-        "departureTime": "16:33:00",
-        "arrivalTime": "17:00:00",
-        "routeId": "43540",
-        "days": [
-          5
         ]
       },
       {
@@ -3171,27 +2982,9 @@
         ]
       },
       {
-        "trainNumber": "7545",
-        "departureTime": "22:42:00",
-        "arrivalTime": "23:09:00",
-        "routeId": "32526",
-        "days": [
-          6
-        ]
-      },
-      {
         "trainNumber": "7547",
         "departureTime": "23:41:00",
         "arrivalTime": "24:08:00",
-        "routeId": "38560",
-        "days": [
-          6
-        ]
-      },
-      {
-        "trainNumber": "7547",
-        "departureTime": "23:42:00",
-        "arrivalTime": "24:09:00",
         "routeId": "38560",
         "days": [
           6
@@ -3559,15 +3352,6 @@
         ]
       },
       {
-        "trainNumber": "6755",
-        "departureTime": "15:39:00",
-        "arrivalTime": "16:22:00",
-        "routeId": "38512",
-        "days": [
-          5
-        ]
-      },
-      {
         "trainNumber": "753",
         "departureTime": "15:39:00",
         "arrivalTime": "16:22:00",
@@ -3578,15 +3362,6 @@
           2,
           3,
           4
-        ]
-      },
-      {
-        "trainNumber": "6759",
-        "departureTime": "16:09:00",
-        "arrivalTime": "16:52:00",
-        "routeId": "38514",
-        "days": [
-          5
         ]
       },
       {
@@ -3751,15 +3526,6 @@
         ]
       },
       {
-        "trainNumber": "7719",
-        "departureTime": "21:43:00",
-        "arrivalTime": "22:22:00",
-        "routeId": "30559",
-        "days": [
-          6
-        ]
-      },
-      {
         "trainNumber": "777",
         "departureTime": "21:46:00",
         "arrivalTime": "22:29:00",
@@ -3783,15 +3549,6 @@
           2,
           3,
           4
-        ]
-      },
-      {
-        "trainNumber": "7721",
-        "departureTime": "22:39:00",
-        "arrivalTime": "23:22:00",
-        "routeId": "30561",
-        "days": [
-          6
         ]
       },
       {
@@ -3827,15 +3584,6 @@
           2,
           3,
           4
-        ]
-      },
-      {
-        "trainNumber": "7723",
-        "departureTime": "23:39:00",
-        "arrivalTime": "24:22:00",
-        "routeId": "34627",
-        "days": [
-          6
         ]
       },
       {
@@ -4222,15 +3970,6 @@
         ]
       },
       {
-        "trainNumber": "6755",
-        "departureTime": "15:45:00",
-        "arrivalTime": "16:22:00",
-        "routeId": "38512",
-        "days": [
-          5
-        ]
-      },
-      {
         "trainNumber": "753",
         "departureTime": "15:45:00",
         "arrivalTime": "16:22:00",
@@ -4241,15 +3980,6 @@
           2,
           3,
           4
-        ]
-      },
-      {
-        "trainNumber": "6759",
-        "departureTime": "16:15:00",
-        "arrivalTime": "16:52:00",
-        "routeId": "38514",
-        "days": [
-          5
         ]
       },
       {
@@ -4441,15 +4171,6 @@
       },
       {
         "trainNumber": "7721",
-        "departureTime": "22:44:00",
-        "arrivalTime": "23:22:00",
-        "routeId": "30561",
-        "days": [
-          6
-        ]
-      },
-      {
-        "trainNumber": "7721",
         "departureTime": "22:47:00",
         "arrivalTime": "23:22:00",
         "routeId": "30561",
@@ -4481,15 +4202,6 @@
           2,
           3,
           4
-        ]
-      },
-      {
-        "trainNumber": "7723",
-        "departureTime": "23:44:00",
-        "arrivalTime": "24:22:00",
-        "routeId": "34627",
-        "days": [
-          6
         ]
       },
       {
@@ -4776,15 +4488,6 @@
         ]
       },
       {
-        "trainNumber": "6562",
-        "departureTime": "16:29:00",
-        "arrivalTime": "16:45:00",
-        "routeId": "43539",
-        "days": [
-          5
-        ]
-      },
-      {
         "trainNumber": "580",
         "departureTime": "16:59:00",
         "arrivalTime": "17:16:00",
@@ -4860,27 +4563,9 @@
       },
       {
         "trainNumber": "7544",
-        "departureTime": "22:29:00",
-        "arrivalTime": "22:45:00",
-        "routeId": "32525",
-        "days": [
-          6
-        ]
-      },
-      {
-        "trainNumber": "7544",
         "departureTime": "22:30:00",
         "arrivalTime": "22:46:00",
         "routeId": "32525",
-        "days": [
-          6
-        ]
-      },
-      {
-        "trainNumber": "7546",
-        "departureTime": "23:29:00",
-        "arrivalTime": "23:45:00",
-        "routeId": "38559",
         "days": [
           6
         ]
@@ -5373,15 +5058,6 @@
         ]
       },
       {
-        "trainNumber": "6756",
-        "departureTime": "15:39:00",
-        "arrivalTime": "16:34:00",
-        "routeId": "38513",
-        "days": [
-          5
-        ]
-      },
-      {
         "trainNumber": "754",
         "departureTime": "16:09:00",
         "arrivalTime": "17:03:00",
@@ -5392,15 +5068,6 @@
           2,
           3,
           4
-        ]
-      },
-      {
-        "trainNumber": "6760",
-        "departureTime": "16:23:00",
-        "arrivalTime": "17:11:00",
-        "routeId": "38515",
-        "days": [
-          5
         ]
       },
       {
@@ -5557,15 +5224,6 @@
       },
       {
         "trainNumber": "7720",
-        "departureTime": "21:55:00",
-        "arrivalTime": "22:45:00",
-        "routeId": "30560",
-        "days": [
-          6
-        ]
-      },
-      {
-        "trainNumber": "7720",
         "departureTime": "21:56:00",
         "arrivalTime": "22:47:00",
         "routeId": "30560",
@@ -5597,15 +5255,6 @@
           2,
           3,
           4
-        ]
-      },
-      {
-        "trainNumber": "7722",
-        "departureTime": "22:38:00",
-        "arrivalTime": "23:28:00",
-        "routeId": "30562",
-        "days": [
-          6
         ]
       },
       {
@@ -5646,15 +5295,6 @@
       {
         "trainNumber": "7724",
         "departureTime": "23:36:00",
-        "arrivalTime": "24:28:00",
-        "routeId": "34628",
-        "days": [
-          6
-        ]
-      },
-      {
-        "trainNumber": "7724",
-        "departureTime": "23:38:00",
         "arrivalTime": "24:28:00",
         "routeId": "34628",
         "days": [
@@ -6031,15 +5671,6 @@
         ]
       },
       {
-        "trainNumber": "6756",
-        "departureTime": "15:39:00",
-        "arrivalTime": "16:25:00",
-        "routeId": "38513",
-        "days": [
-          5
-        ]
-      },
-      {
         "trainNumber": "752",
         "departureTime": "15:39:00",
         "arrivalTime": "16:25:00",
@@ -6063,15 +5694,6 @@
           2,
           3,
           4
-        ]
-      },
-      {
-        "trainNumber": "6760",
-        "departureTime": "16:23:00",
-        "arrivalTime": "17:05:00",
-        "routeId": "38515",
-        "days": [
-          5
         ]
       },
       {
@@ -6228,15 +5850,6 @@
       },
       {
         "trainNumber": "7720",
-        "departureTime": "21:55:00",
-        "arrivalTime": "22:38:00",
-        "routeId": "30560",
-        "days": [
-          6
-        ]
-      },
-      {
-        "trainNumber": "7720",
         "departureTime": "21:56:00",
         "arrivalTime": "22:40:00",
         "routeId": "30560",
@@ -6268,15 +5881,6 @@
           2,
           3,
           4
-        ]
-      },
-      {
-        "trainNumber": "7722",
-        "departureTime": "22:38:00",
-        "arrivalTime": "23:21:00",
-        "routeId": "30562",
-        "days": [
-          6
         ]
       },
       {
@@ -6317,15 +5921,6 @@
       {
         "trainNumber": "7724",
         "departureTime": "23:36:00",
-        "arrivalTime": "24:21:00",
-        "routeId": "34628",
-        "days": [
-          6
-        ]
-      },
-      {
-        "trainNumber": "7724",
-        "departureTime": "23:38:00",
         "arrivalTime": "24:21:00",
         "routeId": "34628",
         "days": [
@@ -6811,15 +6406,6 @@
         ]
       },
       {
-        "trainNumber": "6756",
-        "departureTime": "15:39:00",
-        "arrivalTime": "16:20:00",
-        "routeId": "38513",
-        "days": [
-          5
-        ]
-      },
-      {
         "trainNumber": "752",
         "departureTime": "15:39:00",
         "arrivalTime": "16:20:00",
@@ -6843,15 +6429,6 @@
           2,
           3,
           4
-        ]
-      },
-      {
-        "trainNumber": "6760",
-        "departureTime": "16:23:00",
-        "arrivalTime": "17:00:00",
-        "routeId": "38515",
-        "days": [
-          5
         ]
       },
       {
@@ -7008,15 +6585,6 @@
       },
       {
         "trainNumber": "7720",
-        "departureTime": "21:55:00",
-        "arrivalTime": "22:33:00",
-        "routeId": "30560",
-        "days": [
-          6
-        ]
-      },
-      {
-        "trainNumber": "7720",
         "departureTime": "21:56:00",
         "arrivalTime": "22:35:00",
         "routeId": "30560",
@@ -7048,15 +6616,6 @@
           2,
           3,
           4
-        ]
-      },
-      {
-        "trainNumber": "7722",
-        "departureTime": "22:38:00",
-        "arrivalTime": "23:16:00",
-        "routeId": "30562",
-        "days": [
-          6
         ]
       },
       {
@@ -7097,15 +6656,6 @@
       {
         "trainNumber": "7724",
         "departureTime": "23:36:00",
-        "arrivalTime": "24:16:00",
-        "routeId": "34628",
-        "days": [
-          6
-        ]
-      },
-      {
-        "trainNumber": "7724",
-        "departureTime": "23:38:00",
         "arrivalTime": "24:16:00",
         "routeId": "34628",
         "days": [
@@ -7374,15 +6924,6 @@
         ]
       },
       {
-        "trainNumber": "6562",
-        "departureTime": "16:29:00",
-        "arrivalTime": "16:52:00",
-        "routeId": "43539",
-        "days": [
-          5
-        ]
-      },
-      {
         "trainNumber": "580",
         "departureTime": "16:59:00",
         "arrivalTime": "17:24:00",
@@ -7458,27 +6999,9 @@
       },
       {
         "trainNumber": "7544",
-        "departureTime": "22:29:00",
-        "arrivalTime": "22:52:00",
-        "routeId": "32525",
-        "days": [
-          6
-        ]
-      },
-      {
-        "trainNumber": "7544",
         "departureTime": "22:30:00",
         "arrivalTime": "22:53:00",
         "routeId": "32525",
-        "days": [
-          6
-        ]
-      },
-      {
-        "trainNumber": "7546",
-        "departureTime": "23:29:00",
-        "arrivalTime": "23:52:00",
-        "routeId": "38559",
         "days": [
           6
         ]
@@ -7875,15 +7398,6 @@
         ]
       },
       {
-        "trainNumber": "6756",
-        "departureTime": "15:39:00",
-        "arrivalTime": "16:15:00",
-        "routeId": "38513",
-        "days": [
-          5
-        ]
-      },
-      {
         "trainNumber": "752",
         "departureTime": "15:39:00",
         "arrivalTime": "16:15:00",
@@ -7907,15 +7421,6 @@
           2,
           3,
           4
-        ]
-      },
-      {
-        "trainNumber": "6760",
-        "departureTime": "16:23:00",
-        "arrivalTime": "16:57:00",
-        "routeId": "38515",
-        "days": [
-          5
         ]
       },
       {
@@ -8072,15 +7577,6 @@
       },
       {
         "trainNumber": "7720",
-        "departureTime": "21:55:00",
-        "arrivalTime": "22:29:00",
-        "routeId": "30560",
-        "days": [
-          6
-        ]
-      },
-      {
-        "trainNumber": "7720",
         "departureTime": "21:56:00",
         "arrivalTime": "22:31:00",
         "routeId": "30560",
@@ -8112,15 +7608,6 @@
           2,
           3,
           4
-        ]
-      },
-      {
-        "trainNumber": "7722",
-        "departureTime": "22:38:00",
-        "arrivalTime": "23:12:00",
-        "routeId": "30562",
-        "days": [
-          6
         ]
       },
       {
@@ -8162,15 +7649,6 @@
         "trainNumber": "7724",
         "departureTime": "23:36:00",
         "arrivalTime": "24:11:00",
-        "routeId": "34628",
-        "days": [
-          6
-        ]
-      },
-      {
-        "trainNumber": "7724",
-        "departureTime": "23:38:00",
-        "arrivalTime": "24:12:00",
         "routeId": "34628",
         "days": [
           6
@@ -8559,15 +8037,6 @@
         ]
       },
       {
-        "trainNumber": "6756",
-        "departureTime": "15:39:00",
-        "arrivalTime": "16:10:00",
-        "routeId": "38513",
-        "days": [
-          5
-        ]
-      },
-      {
         "trainNumber": "752",
         "departureTime": "15:39:00",
         "arrivalTime": "16:10:00",
@@ -8591,15 +8060,6 @@
           2,
           3,
           4
-        ]
-      },
-      {
-        "trainNumber": "6760",
-        "departureTime": "16:23:00",
-        "arrivalTime": "16:53:00",
-        "routeId": "38515",
-        "days": [
-          5
         ]
       },
       {
@@ -8756,15 +8216,6 @@
       },
       {
         "trainNumber": "7720",
-        "departureTime": "21:55:00",
-        "arrivalTime": "22:25:00",
-        "routeId": "30560",
-        "days": [
-          6
-        ]
-      },
-      {
-        "trainNumber": "7720",
         "departureTime": "21:56:00",
         "arrivalTime": "22:26:00",
         "routeId": "30560",
@@ -8796,15 +8247,6 @@
           2,
           3,
           4
-        ]
-      },
-      {
-        "trainNumber": "7722",
-        "departureTime": "22:38:00",
-        "arrivalTime": "23:08:00",
-        "routeId": "30562",
-        "days": [
-          6
         ]
       },
       {
@@ -8846,15 +8288,6 @@
         "trainNumber": "7724",
         "departureTime": "23:36:00",
         "arrivalTime": "24:06:00",
-        "routeId": "34628",
-        "days": [
-          6
-        ]
-      },
-      {
-        "trainNumber": "7724",
-        "departureTime": "23:38:00",
-        "arrivalTime": "24:08:00",
         "routeId": "34628",
         "days": [
           6
@@ -9339,15 +8772,6 @@
         ]
       },
       {
-        "trainNumber": "6756",
-        "departureTime": "15:39:00",
-        "arrivalTime": "15:59:00",
-        "routeId": "38513",
-        "days": [
-          5
-        ]
-      },
-      {
         "trainNumber": "752",
         "departureTime": "15:39:00",
         "arrivalTime": "15:59:00",
@@ -9371,15 +8795,6 @@
           2,
           3,
           4
-        ]
-      },
-      {
-        "trainNumber": "6760",
-        "departureTime": "16:23:00",
-        "arrivalTime": "16:43:00",
-        "routeId": "38515",
-        "days": [
-          5
         ]
       },
       {
@@ -9536,15 +8951,6 @@
       },
       {
         "trainNumber": "7720",
-        "departureTime": "21:55:00",
-        "arrivalTime": "22:15:00",
-        "routeId": "30560",
-        "days": [
-          6
-        ]
-      },
-      {
-        "trainNumber": "7720",
         "departureTime": "21:56:00",
         "arrivalTime": "22:16:00",
         "routeId": "30560",
@@ -9576,15 +8982,6 @@
           2,
           3,
           4
-        ]
-      },
-      {
-        "trainNumber": "7722",
-        "departureTime": "22:38:00",
-        "arrivalTime": "22:58:00",
-        "routeId": "30562",
-        "days": [
-          6
         ]
       },
       {
@@ -9626,15 +9023,6 @@
         "trainNumber": "7724",
         "departureTime": "23:36:00",
         "arrivalTime": "23:56:00",
-        "routeId": "34628",
-        "days": [
-          6
-        ]
-      },
-      {
-        "trainNumber": "7724",
-        "departureTime": "23:38:00",
-        "arrivalTime": "23:58:00",
         "routeId": "34628",
         "days": [
           6
@@ -10107,15 +9495,6 @@
         ]
       },
       {
-        "trainNumber": "6755",
-        "departureTime": "15:56:00",
-        "arrivalTime": "16:22:00",
-        "routeId": "38512",
-        "days": [
-          5
-        ]
-      },
-      {
         "trainNumber": "753",
         "departureTime": "15:56:00",
         "arrivalTime": "16:22:00",
@@ -10126,15 +9505,6 @@
           2,
           3,
           4
-        ]
-      },
-      {
-        "trainNumber": "6759",
-        "departureTime": "16:26:00",
-        "arrivalTime": "16:52:00",
-        "routeId": "38514",
-        "days": [
-          5
         ]
       },
       {
@@ -10326,15 +9696,6 @@
       },
       {
         "trainNumber": "7721",
-        "departureTime": "22:56:00",
-        "arrivalTime": "23:22:00",
-        "routeId": "30561",
-        "days": [
-          6
-        ]
-      },
-      {
-        "trainNumber": "7721",
         "departureTime": "22:57:00",
         "arrivalTime": "23:22:00",
         "routeId": "30561",
@@ -10370,15 +9731,6 @@
       },
       {
         "trainNumber": "7723",
-        "departureTime": "23:56:00",
-        "arrivalTime": "24:22:00",
-        "routeId": "34627",
-        "days": [
-          6
-        ]
-      },
-      {
-        "trainNumber": "7723",
         "departureTime": "23:57:00",
         "arrivalTime": "24:22:00",
         "routeId": "34627",
@@ -10401,5 +9753,5 @@
       }
     ]
   },
-  "version": "0.6.4"
+  "version": "0.6.5"
 }
