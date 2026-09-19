@@ -1,11 +1,11 @@
 {
   "generatedFrom": "gtfs.zip",
-  "generatedAt": "2026-09-12T08:13:01.369Z",
+  "generatedAt": "2026-09-19T08:22:56.121Z",
   "agencyId": "2",
   "serviceMode": "all-days",
-  "serviceCount": 67274,
+  "serviceCount": 75560,
   "stationCount": 66,
-  "pairCount": 20,
+  "pairCount": 16,
   "stations": [
     {
       "stationId": 9700,
@@ -585,7 +585,6 @@
         "arrivalTime": "22:08:00",
         "routeId": "32524",
         "days": [
-          0,
           6
         ]
       },
@@ -595,7 +594,6 @@
         "arrivalTime": "23:08:00",
         "routeId": "32526",
         "days": [
-          0,
           6
         ]
       },
@@ -605,7 +603,6 @@
         "arrivalTime": "24:08:00",
         "routeId": "38560",
         "days": [
-          0,
           6
         ]
       }
@@ -1282,7 +1279,6 @@
         "arrivalTime": "21:22:00",
         "routeId": "37564",
         "days": [
-          0,
           6
         ]
       },
@@ -1305,7 +1301,6 @@
         "arrivalTime": "22:22:00",
         "routeId": "30559",
         "days": [
-          0,
           6
         ]
       },
@@ -1341,7 +1336,6 @@
         "arrivalTime": "23:22:00",
         "routeId": "30561",
         "days": [
-          0,
           6
         ]
       },
@@ -1377,7 +1371,6 @@
         "arrivalTime": "24:22:00",
         "routeId": "34627",
         "days": [
-          0,
           6
         ]
       },
@@ -1912,7 +1905,6 @@
         "arrivalTime": "21:22:00",
         "routeId": "37564",
         "days": [
-          0,
           6
         ]
       },
@@ -1935,7 +1927,6 @@
         "arrivalTime": "22:22:00",
         "routeId": "30559",
         "days": [
-          0,
           6
         ]
       },
@@ -1971,7 +1962,6 @@
         "arrivalTime": "23:22:00",
         "routeId": "30561",
         "days": [
-          0,
           6
         ]
       },
@@ -2007,7 +1997,6 @@
         "arrivalTime": "24:22:00",
         "routeId": "34627",
         "days": [
-          0,
           6
         ]
       },
@@ -2697,7 +2686,6 @@
         "arrivalTime": "21:22:00",
         "routeId": "37564",
         "days": [
-          0,
           6
         ]
       },
@@ -2720,7 +2708,6 @@
         "arrivalTime": "22:22:00",
         "routeId": "30559",
         "days": [
-          0,
           6
         ]
       },
@@ -2756,7 +2743,6 @@
         "arrivalTime": "23:22:00",
         "routeId": "30561",
         "days": [
-          0,
           6
         ]
       },
@@ -2792,7 +2778,6 @@
         "arrivalTime": "24:22:00",
         "routeId": "34627",
         "days": [
-          0,
           6
         ]
       },
@@ -3122,7 +3107,6 @@
         "arrivalTime": "22:08:00",
         "routeId": "32524",
         "days": [
-          0,
           6
         ]
       },
@@ -3132,7 +3116,6 @@
         "arrivalTime": "23:08:00",
         "routeId": "32526",
         "days": [
-          0,
           6
         ]
       },
@@ -3142,7 +3125,6 @@
         "arrivalTime": "24:08:00",
         "routeId": "38560",
         "days": [
-          0,
           6
         ]
       }
@@ -3664,7 +3646,6 @@
         "arrivalTime": "21:22:00",
         "routeId": "37564",
         "days": [
-          0,
           6
         ]
       },
@@ -3687,7 +3668,6 @@
         "arrivalTime": "22:22:00",
         "routeId": "30559",
         "days": [
-          0,
           6
         ]
       },
@@ -3723,7 +3703,6 @@
         "arrivalTime": "23:22:00",
         "routeId": "30561",
         "days": [
-          0,
           6
         ]
       },
@@ -3759,7 +3738,6 @@
         "arrivalTime": "24:22:00",
         "routeId": "34627",
         "days": [
-          0,
           6
         ]
       },
@@ -4294,7 +4272,6 @@
         "arrivalTime": "21:22:00",
         "routeId": "37564",
         "days": [
-          0,
           6
         ]
       },
@@ -4317,7 +4294,6 @@
         "arrivalTime": "22:22:00",
         "routeId": "30559",
         "days": [
-          0,
           6
         ]
       },
@@ -4353,7 +4329,6 @@
         "arrivalTime": "23:22:00",
         "routeId": "30561",
         "days": [
-          0,
           6
         ]
       },
@@ -4389,7 +4364,6 @@
         "arrivalTime": "24:22:00",
         "routeId": "34627",
         "days": [
-          0,
           6
         ]
       },
@@ -4402,18 +4376,6 @@
           0,
           1,
           2,
-          3,
-          4
-        ]
-      }
-    ],
-    "680_2800": [
-      {
-        "trainNumber": "782",
-        "departureTime": "23:02:00",
-        "arrivalTime": "24:28:00",
-        "routeId": "35505",
-        "days": [
           3,
           4
         ]
@@ -4757,7 +4719,6 @@
         "arrivalTime": "21:46:00",
         "routeId": "32523",
         "days": [
-          0,
           6
         ]
       },
@@ -4767,7 +4728,6 @@
         "arrivalTime": "22:46:00",
         "routeId": "32525",
         "days": [
-          0,
           6
         ]
       },
@@ -4777,44 +4737,7 @@
         "arrivalTime": "23:46:00",
         "routeId": "38559",
         "days": [
-          0,
           6
-        ]
-      }
-    ],
-    "680_3100": [
-      {
-        "trainNumber": "782",
-        "departureTime": "23:02:00",
-        "arrivalTime": "24:21:00",
-        "routeId": "35505",
-        "days": [
-          3,
-          4
-        ]
-      }
-    ],
-    "680_3300": [
-      {
-        "trainNumber": "782",
-        "departureTime": "23:02:00",
-        "arrivalTime": "24:12:00",
-        "routeId": "35505",
-        "days": [
-          3,
-          4
-        ]
-      }
-    ],
-    "680_3400": [
-      {
-        "trainNumber": "782",
-        "departureTime": "23:02:00",
-        "arrivalTime": "24:05:00",
-        "routeId": "35505",
-        "days": [
-          3,
-          4
         ]
       }
     ],
@@ -5505,7 +5428,6 @@
         "arrivalTime": "21:47:00",
         "routeId": "37565",
         "days": [
-          0,
           6
         ]
       },
@@ -5541,7 +5463,6 @@
         "arrivalTime": "22:47:00",
         "routeId": "30560",
         "days": [
-          0,
           6
         ]
       },
@@ -5577,7 +5498,6 @@
         "arrivalTime": "23:47:00",
         "routeId": "30562",
         "days": [
-          0,
           6
         ]
       },
@@ -5585,7 +5505,7 @@
         "trainNumber": "782",
         "departureTime": "23:02:00",
         "arrivalTime": "23:55:00",
-        "routeId": "35505",
+        "routeId": "30349",
         "days": [
           0,
           1,
@@ -5613,7 +5533,6 @@
         "arrivalTime": "24:28:00",
         "routeId": "34628",
         "days": [
-          0,
           6
         ]
       }
@@ -6161,7 +6080,6 @@
         "arrivalTime": "21:40:00",
         "routeId": "37565",
         "days": [
-          0,
           6
         ]
       },
@@ -6197,7 +6115,6 @@
         "arrivalTime": "22:40:00",
         "routeId": "30560",
         "days": [
-          0,
           6
         ]
       },
@@ -6233,7 +6150,6 @@
         "arrivalTime": "23:40:00",
         "routeId": "30562",
         "days": [
-          0,
           6
         ]
       },
@@ -6241,7 +6157,7 @@
         "trainNumber": "782",
         "departureTime": "23:02:00",
         "arrivalTime": "23:48:00",
-        "routeId": "35505",
+        "routeId": "30349",
         "days": [
           0,
           1,
@@ -6269,7 +6185,6 @@
         "arrivalTime": "24:21:00",
         "routeId": "34628",
         "days": [
-          0,
           6
         ]
       }
@@ -6974,7 +6889,6 @@
         "arrivalTime": "21:35:00",
         "routeId": "37565",
         "days": [
-          0,
           6
         ]
       },
@@ -7010,7 +6924,6 @@
         "arrivalTime": "22:35:00",
         "routeId": "30560",
         "days": [
-          0,
           6
         ]
       },
@@ -7031,7 +6944,7 @@
         "trainNumber": "780",
         "departureTime": "22:32:00",
         "arrivalTime": "23:10:00",
-        "routeId": "33375",
+        "routeId": "30347",
         "days": [
           0,
           1,
@@ -7046,7 +6959,6 @@
         "arrivalTime": "23:35:00",
         "routeId": "30562",
         "days": [
-          0,
           6
         ]
       },
@@ -7054,7 +6966,7 @@
         "trainNumber": "782",
         "departureTime": "23:02:00",
         "arrivalTime": "23:43:00",
-        "routeId": "35505",
+        "routeId": "30349",
         "days": [
           0,
           1,
@@ -7082,7 +6994,6 @@
         "arrivalTime": "24:16:00",
         "routeId": "34628",
         "days": [
-          0,
           6
         ]
       }
@@ -7425,7 +7336,6 @@
         "arrivalTime": "21:53:00",
         "routeId": "32523",
         "days": [
-          0,
           6
         ]
       },
@@ -7435,7 +7345,6 @@
         "arrivalTime": "22:53:00",
         "routeId": "32525",
         "days": [
-          0,
           6
         ]
       },
@@ -7445,7 +7354,6 @@
         "arrivalTime": "23:53:00",
         "routeId": "38559",
         "days": [
-          0,
           6
         ]
       }
@@ -8006,7 +7914,6 @@
         "arrivalTime": "21:31:00",
         "routeId": "37565",
         "days": [
-          0,
           6
         ]
       },
@@ -8042,7 +7949,6 @@
         "arrivalTime": "22:31:00",
         "routeId": "30560",
         "days": [
-          0,
           6
         ]
       },
@@ -8063,7 +7969,7 @@
         "trainNumber": "780",
         "departureTime": "22:32:00",
         "arrivalTime": "23:06:00",
-        "routeId": "33375",
+        "routeId": "30347",
         "days": [
           0,
           1,
@@ -8078,7 +7984,6 @@
         "arrivalTime": "23:31:00",
         "routeId": "30562",
         "days": [
-          0,
           6
         ]
       },
@@ -8086,7 +7991,7 @@
         "trainNumber": "782",
         "departureTime": "23:02:00",
         "arrivalTime": "23:38:00",
-        "routeId": "35505",
+        "routeId": "30349",
         "days": [
           0,
           1,
@@ -8114,7 +8019,6 @@
         "arrivalTime": "24:11:00",
         "routeId": "34628",
         "days": [
-          0,
           6
         ]
       }
@@ -8675,7 +8579,6 @@
         "arrivalTime": "21:26:00",
         "routeId": "37565",
         "days": [
-          0,
           6
         ]
       },
@@ -8711,7 +8614,6 @@
         "arrivalTime": "22:26:00",
         "routeId": "30560",
         "days": [
-          0,
           6
         ]
       },
@@ -8732,7 +8634,7 @@
         "trainNumber": "780",
         "departureTime": "22:32:00",
         "arrivalTime": "23:02:00",
-        "routeId": "33375",
+        "routeId": "30347",
         "days": [
           0,
           1,
@@ -8747,7 +8649,6 @@
         "arrivalTime": "23:26:00",
         "routeId": "30562",
         "days": [
-          0,
           6
         ]
       },
@@ -8755,7 +8656,7 @@
         "trainNumber": "782",
         "departureTime": "23:02:00",
         "arrivalTime": "23:33:00",
-        "routeId": "35505",
+        "routeId": "30349",
         "days": [
           0,
           1,
@@ -8783,7 +8684,6 @@
         "arrivalTime": "24:06:00",
         "routeId": "34628",
         "days": [
-          0,
           6
         ]
       }
@@ -9488,7 +9388,6 @@
         "arrivalTime": "21:16:00",
         "routeId": "37565",
         "days": [
-          0,
           6
         ]
       },
@@ -9524,7 +9423,6 @@
         "arrivalTime": "22:16:00",
         "routeId": "30560",
         "days": [
-          0,
           6
         ]
       },
@@ -9545,7 +9443,7 @@
         "trainNumber": "780",
         "departureTime": "22:32:00",
         "arrivalTime": "22:52:00",
-        "routeId": "33375",
+        "routeId": "30347",
         "days": [
           0,
           1,
@@ -9560,7 +9458,6 @@
         "arrivalTime": "23:16:00",
         "routeId": "30562",
         "days": [
-          0,
           6
         ]
       },
@@ -9568,7 +9465,7 @@
         "trainNumber": "782",
         "departureTime": "23:02:00",
         "arrivalTime": "23:23:00",
-        "routeId": "35505",
+        "routeId": "30349",
         "days": [
           0,
           1,
@@ -9596,7 +9493,6 @@
         "arrivalTime": "23:56:00",
         "routeId": "34628",
         "days": [
-          0,
           6
         ]
       }
@@ -10273,7 +10169,6 @@
         "arrivalTime": "21:22:00",
         "routeId": "37564",
         "days": [
-          0,
           6
         ]
       },
@@ -10296,7 +10191,6 @@
         "arrivalTime": "22:22:00",
         "routeId": "30559",
         "days": [
-          0,
           6
         ]
       },
@@ -10332,7 +10226,6 @@
         "arrivalTime": "23:22:00",
         "routeId": "30561",
         "days": [
-          0,
           6
         ]
       },
@@ -10368,7 +10261,6 @@
         "arrivalTime": "24:22:00",
         "routeId": "34627",
         "days": [
-          0,
           6
         ]
       },
@@ -10387,5 +10279,5 @@
       }
     ]
   },
-  "version": "0.6.5"
+  "version": "0.6.6"
 }
